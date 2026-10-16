@@ -5,7 +5,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700&family=Albert+Sans:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: fixed side  navigation + one working view at a time; the page never scrolls, long lists scroll inside their panel.
+/* Layout: fixed side navigation + one working view at a time; the page never scrolls, long lists scroll inside their panel.
    References: Monarch Money (navigation), Copilot Money (spending ring + category list), YNAB (key-figure strip). */
 :root{
   --bg:#F3F4F7; --surface:#FFFFFF; --surface-2:#F8F9FB; --ink:#0F1420; --ink-2:#344054; --muted:#6A7385; --line:#E3E6EC;
@@ -65,7 +65,11 @@ button{cursor:pointer}
 .sheet-links{display:flex;gap:6px;padding:0 4px}
 .sheet-links a,.sheet-links button{flex:1;text-align:center;font-size:.74rem;font-weight:600;color:#fff;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:6px 8px;text-decoration:none}
 .sheet-links a:hover,.sheet-links button:hover{background:rgba(255,255,255,.18)}
-.sheet-banner{display:none}
+.sync-banner{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;border-radius:var(--r);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);background:var(--warn-soft)}
+.sync-banner > div{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 260px}
+.sync-banner b{font-weight:700;color:var(--ink)}
+.sync-banner span{font-size:.84rem;color:var(--ink-2)}
+.sync-banner.busy{border-color:var(--line);background:var(--surface)}
 .side-foot .status{font-size:.72rem;color:var(--nav-muted);margin:0;display:flex;align-items:center;gap:7px}
 .side-foot .status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--pos);flex:none}
 .side-month{display:flex;flex-direction:column;gap:3px;padding:12px;border:1px solid var(--nav-active);border-radius:10px;background:var(--nav-hover);margin-bottom:6px}
@@ -408,6 +412,10 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
       </div>
     </header>
 
+    <div class="sync-banner" id="syncBanner" hidden>
+      <div><b id="syncTitle">Google Sheets n'est pas encore relié</b><span id="syncText">Vos données s'affichent depuis la copie de secours. Autorisez Google Sheets pour enregistrer dans le classeur.</span></div>
+      <button class="btn" id="syncConnect" type="button">Connecter Google Sheets</button>
+    </div>
     <main class="board">
       <!-- MOIS -->
       <div class="pane p-mois" data-pane="mois">
@@ -589,16 +597,18 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
   function dbStore(db){
     return {
       kind:'db',
+      stop(){ (this._uns||[]).forEach(u=>{ try{u();}catch(e){} }); this._uns=[]; },
       start(){
-        db.collection('expenses').onSnapshot(snap=>{
+        const U=this._uns=[];
+        U.push(db.collection('expenses').onSnapshot(snap=>{
           expenses = snap.docs.map(d=>({id:d.id, ...d.data()}));
           render();
-        }, e=>{ console.error(e); $('status').textContent='Connexion perdue. Rechargez la page.'; });
-        db.collection('months').onSnapshot(snap=>{
+        }, e=>{ console.error(e); }));
+        U.push(db.collection('months').onSnapshot(snap=>{
           const b={}; snap.docs.forEach(d=>{ b[d.id]=Number(d.data().budget)||0; }); budgets=b; render();
-        }, e=>console.error(e));
-        db.collection('essentials').onSnapshot(snap=>{ essentials = snap.docs.map(d=>({id:d.id, ...d.data()})); render(); }, e=>console.error(e));
-        db.doc('settings/main').onSnapshot(s=>{ goal = s.exists ? (Number(s.data().goal)||0) : 0; render(); }, e=>console.error(e));
+        }, e=>console.error(e)));
+        U.push(db.collection('essentials').onSnapshot(snap=>{ essentials = snap.docs.map(d=>({id:d.id, ...d.data()})); render(); }, e=>console.error(e)));
+        U.push(db.doc('settings/main').onSnapshot(s=>{ goal = s.exists ? (Number(s.data().goal)||0) : 0; render(); }, e=>console.error(e)));
       },
       setGoal(v){ return db.doc('settings/main').set({goal:v}); },
       addEss(e){ return db.collection('essentials').add(e); },
@@ -1151,18 +1161,44 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
   let started=false;
   function startWith(s,msg){ if(started) return; started=true; store=s; if(msg) $('status').textContent=msg; store.start(); }
   const fallbackMsg = 'Mode local : les données restent dans ce navigateur.';
+  let mcpNs = null, sheetS = null, connecting = false;
+  function banner(kind, title, text, showBtn){
+    const b=$('syncBanner'); if(!kind){ b.hidden=true; return; }
+    b.hidden=false; b.classList.toggle('busy', kind==='busy');
+    $('syncTitle').textContent=title; $('syncText').textContent=text;
+    $('syncConnect').hidden=!showBtn; $('syncConnect').disabled=false; $('syncConnect').textContent='Connecter Google Sheets';
+  }
+  function withTimeout(pr, ms){ return Promise.race([pr, new Promise((_,rej)=>setTimeout(()=>rej({code:'timeout'}), ms))]); }
+  async function connectSheets(fromClick){
+    if(!mcpNs || connecting) return;
+    connecting = true;
+    if(fromClick){ $('syncConnect').disabled=true; $('syncConnect').textContent='Connexion…'; }
+    banner('busy','Connexion à Google Sheets…', fromClick ? 'Si une fenêtre d’autorisation s’ouvre, choisissez « Autoriser ».' : 'Lecture du classeur Budget Mahery.', false);
+    setStatus('Connexion à Google Sheets…','busy');
+    const s = sheetStore(mcpNs);
+    try{
+      await withTimeout(s.firstLoad(), fromClick ? 120000 : 20000);
+      if(store && store.stop) store.stop();
+      store = s; sheetS = s; s.start(); banner(null);
+      if(fromClick) toast('Google Sheets connecté');
+    }catch(err){
+      console.error(err);
+      const msg = err && err.code==='timeout' ? 'Google Sheets n’a pas répondu. L’autorisation est peut-être en attente.' : sheetErrText(err);
+      banner('warn','Google Sheets n’est pas relié', msg+' Vos données s’affichent depuis la copie de secours ; les changements ne vont pas dans le classeur.', true);
+      setStatus('Copie de secours (non synchronisée)','err');
+    }finally{ connecting = false; }
+  }
+  $('syncConnect').addEventListener('click', ()=>connectSheets(true));
+
   async function boot(){
     if(!(window.claude && typeof window.claude.use==='function')){ startWith(localStore(), fallbackMsg); return; }
-    let mcp=null; try{ mcp = await window.claude.use('mcp'); }catch(e){}
-    if(mcp){
-      const s = sheetStore(mcp);
-      setStatus('Connexion à Google Sheets…','busy');
-      try{ await s.firstLoad(); startWith(s); return; }
-      catch(err){ console.error(err); var sheetMsg = sheetErrText(err)+' Données affichées depuis la copie de secours, non synchronisées.'; }
-    }
+    // 1. show the data straight away from the backup copy
     let db=null; try{ db = await window.claude.use('db'); }catch(e){}
-    startWith(db ? dbStore(db) : localStore(), sheetMsg || (db ? 'Google Sheets indisponible ici : copie de secours, non synchronisée.' : fallbackMsg));
-    if(sheetMsg || db) $('status').classList.add('err');
+    startWith(db ? dbStore(db) : localStore(), db ? 'Copie de secours' : fallbackMsg);
+    // 2. then connect the Google Sheets workbook, which becomes the store
+    try{ mcpNs = await window.claude.use('mcp'); }catch(e){}
+    if(mcpNs) connectSheets(false);
+    else { banner('warn','Google Sheets indisponible ici','Ouvrez l’application dans claude.ai pour l’enregistrer dans votre classeur. En attendant, les données restent dans la copie de secours.', false); setStatus('Copie de secours (non synchronisée)','err'); }
   }
   boot();
 })();
