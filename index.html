@@ -1,6 +1,11 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Budget Mahery</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#1B2A6E">
+<title>Budget Mahery</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700&family=Albert+Sans:wght@400;500;600;700&display=swap">
@@ -33,6 +38,8 @@
   --shadow:none; color-scheme:dark}
 
 *{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
 html{height:100%;overflow:hidden}
 body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
 button,input{font:inherit;color:inherit}
@@ -62,9 +69,17 @@ button{cursor:pointer}
 .side-foot .status{padding:0 4px}
 .side-foot .status.err::before{background:#FF8A80}
 .side-foot .status.busy::before{background:#F5BE6B}
-.sheet-links{display:flex;gap:6px;padding:0 4px}
+.sheet-links{display:flex;flex-wrap:wrap;gap:6px;padding:0 4px}
 .sheet-links a,.sheet-links button{flex:1;text-align:center;font-size:.74rem;font-weight:600;color:#fff;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:6px 8px;text-decoration:none}
 .sheet-links a:hover,.sheet-links button:hover{background:rgba(255,255,255,.18)}
+.setup{flex:none;display:grid;gap:8px;padding:16px 18px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow);max-width:640px}
+.setup-h{display:flex;flex-direction:column;gap:2px;margin-bottom:4px}
+.setup-h b{font-family:var(--f-display);font-size:1.05rem}
+.setup-h span{font-size:.84rem;color:var(--muted)}
+.setup label{font-size:.78rem;font-weight:600;color:var(--ink-2)}
+.setup input{border:1px solid var(--line);background:var(--surface-2);border-radius:9px;padding:9px 11px;min-width:0;width:100%}
+.setup input:focus{border-color:var(--brand);outline:none;background:var(--surface)}
+.setup:not([hidden]) ~ .board{display:none}
 .sync-banner{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;border-radius:var(--r);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);background:var(--warn-soft)}
 .sync-banner > div{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 260px}
 .sync-banner b{font-weight:700;color:var(--ink)}
@@ -190,7 +205,7 @@ form.add input.r{text-align:right;font-variant-numeric:tabular-nums}
 .breakdown li.none{display:block;color:var(--muted)}
 
 /* ---------- Analyse ---------- */
-.p-analyse.active{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+.p-analyse.active{grid-template-columns:minmax(0,1fr);max-width:900px}
 .insights{list-style:none;margin:0;padding:6px 0}
 .insight{display:block;padding:13px 18px 13px 16px;border-bottom:1px solid var(--line);border-left:3px solid var(--brand)}
 .insight.good{border-left-color:var(--pos)} .insight.warn{border-left-color:var(--warn)} .insight.alert{border-left-color:var(--neg)}
@@ -333,7 +348,7 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
 .topbar h1{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 
 .kpis{overflow:hidden;flex:none}
-[hidden]{display:none!important}
+
 .kpi:nth-child(3){background:var(--grad);color:#fff;border-left:0}
 .kpi:nth-child(3) .cap,.kpi:nth-child(3) .d,.kpi:nth-child(3) .v small{color:rgba(255,255,255,.8)}
 .kpi:nth-child(3) .v,.kpi:nth-child(3) .v.pos{color:#fff}
@@ -366,6 +381,9 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
   .kpi:nth-child(4){border-left:1px solid var(--line)}
 }
 </style>
+</head>
+<body>
+
 
 <div class="app">
   <aside class="side">
@@ -389,9 +407,10 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
         <span class="sm-s" id="sideDays"></span>
       </div>
       <p class="status" id="status">Chargement…</p>
-      <div class="sheet-links" id="sheetLinks" hidden>
-        <a href="https://docs.google.com/spreadsheets/d/1Ld1XuciNUPi7fpzdPtfrtAwjDbl82xcaDVYrQpwAkMc/edit" target="_blank" rel="noopener">Ouvrir le classeur</a>
+      <div class="sheet-links" id="sheetLinks">
+        <a id="sheetUrl" href="#" target="_blank" rel="noopener">Ouvrir le classeur</a>
         <button type="button" id="syncNow">Actualiser</button>
+        <button type="button" id="openSetup">Réglages</button>
       </div>
     </div>
   </aside>
@@ -413,9 +432,20 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
     </header>
 
     <div class="sync-banner" id="syncBanner" hidden>
-      <div><b id="syncTitle">Google Sheets n'est pas encore relié</b><span id="syncText">Vos données s'affichent depuis la copie de secours. Autorisez Google Sheets pour enregistrer dans le classeur.</span></div>
-      <button class="btn" id="syncConnect" type="button">Connecter Google Sheets</button>
+      <div><b id="syncTitle"></b><span id="syncText"></span></div>
+      <button class="btn" id="syncConnect" type="button">Réessayer</button>
     </div>
+    <form class="setup" id="setup" hidden autocomplete="off">
+      <div class="setup-h">
+        <b>Relier l'application au classeur Budget Mahery</b>
+        <span id="setupMsg">À faire une seule fois sur chaque appareil.</span>
+      </div>
+      <label for="cfgUrl">URL de l'application web Apps Script (se termine par /exec)</label>
+      <input id="cfgUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" required>
+      <label for="cfgKey">Clé d'accès (dans le classeur : menu Budget → Créer / afficher la clé d'accès)</label>
+      <input id="cfgKey" type="password" placeholder="Clé d'accès" required>
+      <div class="btns"><button class="btn" type="submit">Relier</button><button class="btn ghost" type="button" id="setupCancel">Annuler</button></div>
+    </form>
     <main class="board">
       <!-- MOIS -->
       <div class="pane p-mois" data-pane="mois">
@@ -485,14 +515,7 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
           <div class="card-h"><h2>Points du mois</h2><span class="pill" id="smartCount"></span></div>
           <ul class="insights scroll" id="insights"></ul>
         </section>
-        <section class="card" aria-label="Conseiller">
-          <div class="card-h"><h2>Conseiller budget</h2><span class="hint">Claude</span></div>
-          <div class="ai-body">
-            <p>Claude lit vos chiffres des six derniers mois, vos essentielles et votre objectif, puis propose des actions concrètes.</p>
-            <div><button class="btn" id="askAi" type="button">Demander un conseil</button></div>
-            <div class="ai-out" id="aiOut" hidden></div>
-          </div>
-        </section>
+
       </div>
 
       <!-- ESSENTIELLES -->
@@ -572,133 +595,63 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
   function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('on'),1800); }
   function fail(e){ console.error(e); toast("L'enregistrement a échoué. Réessayez."); }
 
-  /* ---------- Local fallback store (this browser only) ---------- */
-  function localStore(){
-    let data = {budgets:{}, expenses:[], goal:0, essentials:[]};
-    try{ const raw = localStorage.getItem('budget-mahery'); if(raw) data = Object.assign(data, JSON.parse(raw)); }catch(e){}
-    const save = ()=>{ try{ localStorage.setItem('budget-mahery', JSON.stringify(data)); }catch(e){} };
-    const emit = ()=>{ budgets = {...data.budgets}; expenses = data.expenses.slice(); goal = data.goal||0; essentials = (data.essentials||[]).slice(); render(); };
-    const nid = ()=>'l'+Date.now()+Math.random().toString(36).slice(2,6);
-    return {
-      kind:'local',
-      start(){ emit(); },
-      async add(e){ data.expenses.push({...e, id:'l'+Date.now()+Math.random().toString(36).slice(2,6)}); save(); emit(); },
-      async update(id,p){ const x=data.expenses.find(e=>e.id===id); if(x) Object.assign(x,p); save(); emit(); },
-      async remove(id){ data.expenses=data.expenses.filter(e=>e.id!==id); save(); emit(); },
-      async setBudget(m,v){ data.budgets[m]=v; save(); emit(); },
-      async setGoal(v){ data.goal=v; save(); emit(); },
-      async addEss(e){ data.essentials.push({...e, id:nid()}); save(); emit(); },
-      async updateEss(id,p){ const x=data.essentials.find(e=>e.id===id); if(x) Object.assign(x,p); save(); emit(); },
-      async removeEss(id){ data.essentials=data.essentials.filter(e=>e.id!==id); save(); emit(); }
-    };
-  }
-
-  /* ---------- Shared store (artifact database) ---------- */
-  function dbStore(db){
-    return {
-      kind:'db',
-      stop(){ (this._uns||[]).forEach(u=>{ try{u();}catch(e){} }); this._uns=[]; },
-      start(){
-        const U=this._uns=[];
-        U.push(db.collection('expenses').onSnapshot(snap=>{
-          expenses = snap.docs.map(d=>({id:d.id, ...d.data()}));
-          render();
-        }, e=>{ console.error(e); }));
-        U.push(db.collection('months').onSnapshot(snap=>{
-          const b={}; snap.docs.forEach(d=>{ b[d.id]=Number(d.data().budget)||0; }); budgets=b; render();
-        }, e=>console.error(e)));
-        U.push(db.collection('essentials').onSnapshot(snap=>{ essentials = snap.docs.map(d=>({id:d.id, ...d.data()})); render(); }, e=>console.error(e)));
-        U.push(db.doc('settings/main').onSnapshot(s=>{ goal = s.exists ? (Number(s.data().goal)||0) : 0; render(); }, e=>console.error(e)));
-      },
-      setGoal(v){ return db.doc('settings/main').set({goal:v}); },
-      addEss(e){ return db.collection('essentials').add(e); },
-      updateEss(id,p){ return db.doc('essentials/'+id).update(p); },
-      removeEss(id){ return db.doc('essentials/'+id).delete(); },
-      add(e){ return db.collection('expenses').add(e); },
-      update(id,p){ return db.doc('expenses/'+id).update(p); },
-      remove(id){ return db.doc('expenses/'+id).delete(); },
-      setBudget(m,v){ return db.doc('months/'+m).set({budget:v}); }
-    };
-  }
-
-  /* ---------- Google Sheets store (the workbook is the source of truth) ---------- */
-  const SHEET_ID = '1Ld1XuciNUPi7fpzdPtfrtAwjDbl82xcaDVYrQpwAkMc';
+  /* ---------- Apps Script store: every change is written straight into the workbook ---------- */
   function setStatus(text, kind){ const el=$('status'); el.textContent=text; el.classList.toggle('err', kind==='err'); el.classList.toggle('busy', kind==='busy'); }
-  function sheetErrText(e){
-    const c = e && e.code;
-    if(c==='needs_reauth') return 'Connexion Google expirée : reconnectez Google Sheets dans claude.ai, Paramètres, Connecteurs.';
-    if(c==='server_not_connected' || c==='selection_required') return 'Google Sheets n’est pas connecté : ajoutez-le dans claude.ai, Paramètres, Connecteurs.';
-    if(c==='not_in_manifest' || c==='approval_required' || c==='consent_required') return 'Accès à Google Sheets non autorisé pour cette page.';
-    if(c==='server_unavailable' || c==='upstream_error') return 'Google Sheets ne répond pas. Réessayez dans un instant.';
-    if(c==='tool_error') return 'Google Sheets a refusé l’opération. Vérifiez que le classeur « Budget Mahery » existe toujours.';
-    if(c==='missing') return 'Cette ligne n’existe plus dans le classeur. Données rechargées.';
-    return 'La synchronisation avec Google Sheets a échoué.';
+  // Liaison avec le classeur : la page appelle le script Apps Script (application web) avec une clé d'accès.
+  const CFG = { url:'budget-api-url', key:'budget-api-key' };
+  function cfgGet(){ try{ return { url: localStorage.getItem(CFG.url) || '', key: localStorage.getItem(CFG.key) || '' }; }catch(e){ return { url:'', key:'' }; } }
+  function cfgSet(url, key){ try{ localStorage.setItem(CFG.url, url); localStorage.setItem(CFG.key, key); }catch(e){} }
+  const run = (fn, ...args) => {
+    const c = cfgGet();
+    if(!c.url || !c.key) return Promise.reject(new Error('NO_CONFIG'));
+    return fetch(c.url, { method:'POST', body: JSON.stringify({ key:c.key, action:fn, args }) })
+      .then(r => { if(!r.ok) throw new Error('Le script a répondu avec une erreur ' + r.status + '.'); return r.json(); })
+      .then(j => { if(!j || !j.ok) throw new Error((j && j.error) || 'Réponse inattendue du script.'); return j.data; });
+  };
+  function needsSetup(err){ const m = String(err && err.message || err); return m==='NO_CONFIG' || /clé/i.test(m); }
+  function errText(err){
+    const m = String(err && err.message || err);
+    if(m==='NO_CONFIG') return 'L’application n’est pas encore reliée au classeur.';
+    if(/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'Le script Apps Script est injoignable. Vérifiez l’URL, et que le déploiement autorise « Tout le monde ».';
+    return m;
   }
-  function sheetStore(mcp){
-    const S='Google Sheets';
-    const T={exp:"'Dépenses'", bud:"Budgets", ess:"Essentielles", par:"'Paramètres'"};
-    const call=(tool,input)=>mcp.callTool(S,tool,Object.assign({spreadsheetId:SHEET_ID},input),{cache:false}).then(r=>r.payload);
-    const vals=async range=>{ const p=await call('get_values',{range}); return (p && p.values) || []; };
-    const isTrue=v=>/^(true|vrai|oui|1)$/i.test(String(v==null?'':v).trim());
-    const txt=v=>String(v==null?'':v).replace(/^'/,'').trim();
-    const num=v=>parseAmt(v);
-    let chain=Promise.resolve(); const q=fn=>{ const pr=chain.then(fn); chain=pr.catch(()=>{}); return pr; };
-    let pending=0, okText='Synchronisé avec Google Sheets';
-
-    async function load(){
-      const [e,b,s,p]=await Promise.all([vals(T.exp+'!A2:F'),vals(T.bud+'!A2:B'),vals(T.ess+'!A2:D'),vals(T.par+'!A2:B')]);
-      expenses=e.filter(r=>txt(r[0])).map(r=>({id:txt(r[0]),month:txt(r[1]),label:txt(r[2]).toUpperCase(),amount:num(r[3]),paid:isTrue(r[4]),createdAt:num(r[5])}));
-      const bb={}; b.forEach(r=>{ const m=txt(r[0]); if(m) bb[m]=num(r[1]); }); budgets=bb;
-      essentials=s.filter(r=>txt(r[0])).map(r=>({id:txt(r[0]),label:txt(r[1]).toUpperCase(),amount:num(r[2]),createdAt:num(r[3])}));
-      let g=0; p.forEach(r=>{ if(/objectif/i.test(txt(r[0]))) g=num(r[1]); }); goal=g;
-      render();
-    }
-    async function rowOf(tab,key){
-      const col=await vals(tab+'!A2:A'); let empty=-1;
-      for(let i=0;i<col.length;i++){ const v=txt(col[i] && col[i][0]); if(v===key) return {row:i+2,found:true}; if(!v && empty<0) empty=i+2; }
-      return {row: empty>0 ? empty : col.length+2, found:false};
-    }
-    const write=(tab,row,arr)=>call('update_values',{range:tab+'!A'+row,values:[arr]});
-    const delRow=(sheetId,row)=>call('update_spreadsheet',{requests:[{deleteDimension:{range:{sheetId,dimension:'ROWS',startIndex:row-1,endIndex:row}}}]});
-    const expRow=e=>[e.id,"'"+e.month,e.label,Number(e.amount)||0,!!e.paid,e.createdAt||0];
-    const essRow=e=>[e.id,e.label,Number(e.amount)||0,e.createdAt||0];
-    const nid=pfx=>pfx+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-
-    function mut(local, remote){
-      local(); render(); pending++; setStatus('Enregistrement dans Google Sheets…','busy');
-      return q(remote).then(()=>{ pending--; if(!pending) setStatus(okText); })
-        .catch(err=>{ pending--; console.error(err); setStatus(sheetErrText(err),'err'); toast(sheetErrText(err)); load().catch(()=>{}); throw err; });
+  function apply(d){
+    if(!d) return;
+    expenses = d.expenses || []; budgets = d.budgets || {}; essentials = d.essentials || []; goal = Number(d.goal) || 0;
+    if(d.url){ $('sheetUrl').href = d.url; }
+    render();
+  }
+  function gasStore(){
+    let chain = Promise.resolve(), pending = 0;
+    const q = fn => { const pr = chain.then(fn); chain = pr.catch(()=>{}); return pr; };
+    const nid = pfx => pfx + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    function mut(local, fn, args){
+      local(); render(); pending++; setStatus('Enregistrement…','busy');
+      return q(() => run(fn, ...args)).then(d => { pending--; if(!pending){ apply(d); setStatus('Enregistré dans Google Sheets'); } })
+        .catch(err => { pending--; console.error(err); setStatus('Échec de l’enregistrement','err'); if(needsSetup(err)) showSetup(errText(err)); else banner(errText(err)); refresh(); throw err; });
     }
     function refresh(){
       if(pending) return Promise.resolve();
       setStatus('Lecture du classeur…','busy');
-      return load().then(()=>setStatus(okText)).catch(err=>{ console.error(err); setStatus(sheetErrText(err),'err'); });
+      return run('getData').then(d => { apply(d); setStatus('Enregistré dans Google Sheets'); banner(null); $('setup').hidden = true; })
+        .catch(err => { console.error(err); setStatus('Lecture impossible','err'); if(needsSetup(err)) showSetup(errText(err)); else banner(errText(err)); });
     }
     return {
-      kind:'sheet',
-      firstLoad: load,
-      start(){
-        setStatus(okText); $('sheetLinks').hidden=false;
-        $('syncNow').addEventListener('click',()=>refresh().then(()=>toast('Données relues depuis Google Sheets')));
-        document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') refresh(); });
-      },
-      add(e){ const it={...e,id:nid('d')};
-        return mut(()=>{ expenses=expenses.concat([it]); }, async()=>{ const r=await rowOf(T.exp,it.id); await write(T.exp,r.row,expRow(it)); }); },
-      update(id,p){ let it=null;
-        return mut(()=>{ expenses=expenses.map(x=>x.id===id?(it={...x,...p}):x); }, async()=>{ if(!it) return; const r=await rowOf(T.exp,id); if(!r.found) throw {code:'missing'}; await write(T.exp,r.row,expRow(it)); }); },
-      remove(id){
-        return mut(()=>{ expenses=expenses.filter(x=>x.id!==id); }, async()=>{ const r=await rowOf(T.exp,id); if(r.found) await delRow(1,r.row); }); },
-      setBudget(m,v){
-        return mut(()=>{ budgets={...budgets,[m]:v}; }, async()=>{ const r=await rowOf(T.bud,m); await write(T.bud,r.row,["'"+m,v]); }); },
-      setGoal(v){
-        return mut(()=>{ goal=v; }, async()=>{ await write(T.par,2,["Objectif d'épargne (Ar)",v]); }); },
-      addEss(e){ const it={...e,id:nid('s')};
-        return mut(()=>{ essentials=essentials.concat([it]); }, async()=>{ const r=await rowOf(T.ess,it.id); await write(T.ess,r.row,essRow(it)); }); },
-      updateEss(id,p){ let it=null;
-        return mut(()=>{ essentials=essentials.map(x=>x.id===id?(it={...x,...p}):x); }, async()=>{ if(!it) return; const r=await rowOf(T.ess,id); if(!r.found) throw {code:'missing'}; await write(T.ess,r.row,essRow(it)); }); },
-      removeEss(id){
-        return mut(()=>{ essentials=essentials.filter(x=>x.id!==id); }, async()=>{ const r=await rowOf(T.ess,id); if(r.found) await delRow(3,r.row); }); }
+      refresh,
+      start(){ refresh(); },
+      add(e){ const it = {...e, id:nid('d')}; return mut(() => { expenses = expenses.concat([it]); }, 'addExpense', [it]); },
+      update(id, p){ return mut(() => { expenses = expenses.map(x => x.id===id ? {...x, ...p} : x); }, 'updateExpense', [id, p]); },
+      remove(id){ return mut(() => { expenses = expenses.filter(x => x.id!==id); }, 'deleteExpense', [id]); },
+      setBudget(m, v){ return mut(() => { budgets = {...budgets, [m]:v}; }, 'setBudget', [m, v]); },
+      setGoal(v){ return mut(() => { goal = v; }, 'setGoal', [v]); },
+      addEss(e){ const it = {...e, id:nid('s')}; return mut(() => { essentials = essentials.concat([it]); }, 'addEssential', [it]); },
+      updateEss(id, p){ return mut(() => { essentials = essentials.map(x => x.id===id ? {...x, ...p} : x); }, 'updateEssential', [id, p]); },
+      removeEss(id){ return mut(() => { essentials = essentials.filter(x => x.id!==id); }, 'deleteEssential', [id]); }
     };
+  }
+  function banner(msg){
+    const b=$('syncBanner'); if(!msg){ b.hidden=true; return; }
+    b.hidden=false; $('syncTitle').textContent='Le classeur n’a pas pu être mis à jour'; $('syncText').textContent=msg;
   }
 
   /* ---------- Render ---------- */
@@ -963,40 +916,6 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
     $('navBadge').hidden = !alerts; $('navBadge').textContent = alerts;
   }
 
-  /* ---------- AI advisor (Claude) ---------- */
-  function renderAdvice(out, text){
-    out.innerHTML='';
-    const lines = String(text||'').split(/\n+/).map(l=>l.trim()).filter(Boolean);
-    let ul=null;
-    lines.forEach(l=>{
-      if(/^[•\-*]\s*/.test(l)){ if(!ul){ ul=document.createElement('ul'); out.appendChild(ul); } const li=document.createElement('li'); li.textContent=l.replace(/^[•\-*]\s*/,''); ul.appendChild(li); }
-      else { ul=null; const p=document.createElement('p'); p.textContent=l; out.appendChild(p); }
-    });
-  }
-  let aiBusy=false;
-  async function askAdvisor(){
-    if(aiBusy) return;
-    const out=$('aiOut'); out.hidden=false; out.classList.remove('err');
-    let sample=null;
-    try{ sample = window.claude && window.claude.use ? await window.claude.use('sample') : null; }catch(e){}
-    if(!sample){ out.classList.add('err'); out.textContent='Le conseiller n’est pas disponible ici. Les analyses ci-dessus restent calculées automatiquement.'; return; }
-    aiBusy=true; $('askAi').disabled=true; $('askAi').textContent='Analyse en cours…'; out.textContent='Réflexion…';
-    const months = trackedMonths().slice(-6).map(stats).filter(s=>s.has).map(s=>({mois:s.m, budget:s.b, depenses_total:s.d, reste:s.r, lignes:s.rows.map(e=>({nom:e.label, montant:e.amount, paye:!!e.paid}))}));
-    const payload = {devise:'Ariary (Ar)', mois_affiche:month, objectif_epargne:goal||null, economies_cumulees:trackedMonths().map(stats).reduce((s,x)=>s+x.r,0), depenses_essentielles:essentials.map(e=>({nom:e.label, montant:e.amount})), historique:months};
-    const prompt = 'Tu es un conseiller en budget personnel pour une personne qui vit à Madagascar et gère son budget mensuel en Ariary. '+
-      'Voici ses données au format JSON :\n'+JSON.stringify(payload)+'\n\n'+
-      'Les libellés sont ses propres noms de dépenses, parfois en malgache ; ne devine pas leur sens s\u2019il est incertain. '+
-      'Réponds en français simple, sans markdown (pas de #, pas de **). Donne : une phrase de bilan, puis 3 à 5 conseils concrets et chiffrés, chacun sur une ligne commençant par « • ». '+
-      'Base-toi uniquement sur ces chiffres, ne fais pas de suppositions sur sa vie privée, et reste bref (120 mots maximum).';
-    try{
-      const res = await sample(prompt, {cache:false, onText:({text})=>{ out.textContent = text || 'Réflexion…'; }});
-      renderAdvice(out, res.text);
-    }catch(e){
-      out.classList.add('err');
-      out.textContent = e && e.code==='not_granted' ? 'Autorisation refusée : le conseiller ne peut pas répondre sans votre accord.' : e && e.code==='rate_limited' ? 'Trop de demandes. Réessayez dans quelques minutes.' : 'Le conseiller n’a pas pu répondre. Réessayez plus tard.';
-    }finally{ aiBusy=false; $('askAi').disabled=false; $('askAi').textContent='Demander un conseil'; }
-  }
-
   /* ---------- Savings: reste of every month, cumulated ---------- */
   function renderSavings(){
     const months = new Set(Object.keys(budgets).filter(m=>budgets[m]>0));
@@ -1097,7 +1016,6 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
     }
   });
 
-  $('askAi').addEventListener('click', askAdvisor);
   $('insights').addEventListener('click',ev=>{
     const b=ev.target.closest('.act'); if(!b||!store) return;
     const a=b.dataset.act;
@@ -1158,50 +1076,25 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
   showTab('mois');
 
   /* ---------- Boot ---------- */
-  let started=false;
-  function startWith(s,msg){ if(started) return; started=true; store=s; if(msg) $('status').textContent=msg; store.start(); }
-  const fallbackMsg = 'Mode local : les données restent dans ce navigateur.';
-  let mcpNs = null, sheetS = null, connecting = false;
-  function banner(kind, title, text, showBtn){
-    const b=$('syncBanner'); if(!kind){ b.hidden=true; return; }
-    b.hidden=false; b.classList.toggle('busy', kind==='busy');
-    $('syncTitle').textContent=title; $('syncText').textContent=text;
-    $('syncConnect').hidden=!showBtn; $('syncConnect').disabled=false; $('syncConnect').textContent='Connecter Google Sheets';
+  function showSetup(msg){
+    const c = cfgGet(); $('cfgUrl').value = c.url; $('cfgKey').value = c.key;
+    $('setupMsg').textContent = msg || 'À faire une seule fois sur chaque appareil.';
+    $('setup').hidden = false; banner(null);
   }
-  function withTimeout(pr, ms){ return Promise.race([pr, new Promise((_,rej)=>setTimeout(()=>rej({code:'timeout'}), ms))]); }
-  async function connectSheets(fromClick){
-    if(!mcpNs || connecting) return;
-    connecting = true;
-    if(fromClick){ $('syncConnect').disabled=true; $('syncConnect').textContent='Connexion…'; }
-    banner('busy','Connexion à Google Sheets…', fromClick ? 'Si une fenêtre d’autorisation s’ouvre, choisissez « Autoriser ».' : 'Lecture du classeur Budget Mahery.', false);
-    setStatus('Connexion à Google Sheets…','busy');
-    const s = sheetStore(mcpNs);
-    try{
-      await withTimeout(s.firstLoad(), fromClick ? 120000 : 20000);
-      if(store && store.stop) store.stop();
-      store = s; sheetS = s; s.start(); banner(null);
-      if(fromClick) toast('Google Sheets connecté');
-    }catch(err){
-      console.error(err);
-      const msg = err && err.code==='timeout' ? 'Google Sheets n’a pas répondu. L’autorisation est peut-être en attente.' : sheetErrText(err);
-      banner('warn','Google Sheets n’est pas relié', msg+' Vos données s’affichent depuis la copie de secours ; les changements ne vont pas dans le classeur.', true);
-      setStatus('Copie de secours (non synchronisée)','err');
-    }finally{ connecting = false; }
-  }
-  $('syncConnect').addEventListener('click', ()=>connectSheets(true));
-
-  async function boot(){
-    if(!(window.claude && typeof window.claude.use==='function')){ startWith(localStore(), fallbackMsg); return; }
-    // 1. show the data straight away from the backup copy
-    let db=null; try{ db = await window.claude.use('db'); }catch(e){}
-    startWith(db ? dbStore(db) : localStore(), db ? 'Copie de secours' : fallbackMsg);
-    // 2. then connect the Google Sheets workbook, which becomes the store
-    try{ mcpNs = await window.claude.use('mcp'); }catch(e){}
-    if(mcpNs) connectSheets(false);
-    else { banner('warn','Google Sheets indisponible ici','Ouvrez l’application dans claude.ai pour l’enregistrer dans votre classeur. En attendant, les données restent dans la copie de secours.', false); setStatus('Copie de secours (non synchronisée)','err'); }
-  }
-  boot();
+  $('setup').addEventListener('submit', ev => {
+    ev.preventDefault();
+    cfgSet($('cfgUrl').value.trim(), $('cfgKey').value.trim());
+    $('setup').hidden = true; store.refresh();
+  });
+  $('setupCancel').addEventListener('click', () => { $('setup').hidden = true; });
+  $('openSetup').addEventListener('click', () => showSetup());
+  store = gasStore();
+  $('syncNow').addEventListener('click', () => store.refresh().then(() => toast('Données relues depuis le classeur')));
+  $('syncConnect').addEventListener('click', () => store.refresh());
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState==='visible') store.refresh(); });
+  store.start();
 })();
 </script>
 
-</body></html>
+</body>
+</html>
