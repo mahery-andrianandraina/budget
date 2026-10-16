@@ -380,12 +380,55 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
   .kpi:nth-child(3){border-top:0}
   .kpi:nth-child(4){border-left:1px solid var(--line)}
 }
+
+/* ===== Loading and change animations ===== */
+.loadbar{position:fixed;left:0;right:0;top:0;height:3px;z-index:30;overflow:hidden;pointer-events:none;opacity:0;transition:opacity .25s}
+.loadbar::before{content:"";position:absolute;top:0;bottom:0;width:40%;left:-40%;border-radius:0 3px 3px 0;background:var(--grad,linear-gradient(90deg,#2B55E6,#14A08A));animation:loadslide 1.1s cubic-bezier(.45,0,.25,1) infinite}
+body.is-busy .loadbar{opacity:1}
+@keyframes loadslide{0%{left:-40%;width:40%}60%{width:55%}100%{left:100%;width:30%}}
+.status.busy::before{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:.5}}
+
+.skel{position:relative;overflow:hidden;background:var(--line);border-radius:6px;display:block}
+.skel::after,.app.loading .kpi .v::after,.app.loading #budget::after{content:"";position:absolute;inset:0;transform:translateX(-100%);
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--surface) 65%,transparent),transparent);animation:shimmer 1.3s ease-in-out infinite}
+@keyframes shimmer{100%{transform:translateX(100%)}}
+.row.skel-row{pointer-events:none}
+.row.skel-row .skel{height:12px}
+.row.skel-row .s1{width:62px;height:20px;border-radius:99px}
+.row.skel-row .s2{width:55%}
+.row.skel-row .s3{width:70px;justify-self:end}
+.app.loading .kpi .v{position:relative;color:transparent!important;background:var(--line);border-radius:7px;overflow:hidden}
+.app.loading .kpi .v *{visibility:hidden}
+.app.loading #budget{color:transparent}
+.app.loading #budget::placeholder{color:transparent}
+.app.loading .breakdown,.app.loading #ring{opacity:.35;transition:opacity .3s}
+
+.row.enter{animation:rowIn .42s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rowIn{from{opacity:0;transform:translateY(-8px);background:var(--brand-soft)}to{opacity:1;transform:none}}
+.row.saving{position:relative}
+.row.saving::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent,var(--brand),var(--g2,#14A08A),transparent);background-size:200% 100%;animation:savebar 1s linear infinite}
+.row.saving input.amt,.row.saving input.lab{opacity:.65}
+@keyframes savebar{from{background-position:200% 0}to{background-position:-200% 0}}
+.row.leaving{animation:rowOut .26s ease-in forwards;pointer-events:none}
+@keyframes rowOut{to{opacity:0;transform:translateX(24px);min-height:0;height:0;padding-top:0;padding-bottom:0;border-bottom-width:0}}
+.row.saved{animation:savedFlash .7s ease-out}
+@keyframes savedFlash{0%{background:color-mix(in srgb,var(--pos-soft) 90%,transparent)}100%{background:transparent}}
+.pane.active{animation:paneIn .28s ease-out}
+@keyframes paneIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.breakdown .t b,.meter i,#goalBar,.sm-bar i{transition:width .6s cubic-bezier(.2,.8,.2,1)}
+#ring circle{transition:stroke-dasharray .6s cubic-bezier(.2,.8,.2,1),stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){
+  .loadbar::before,.skel::after,.row.enter,.row.leaving,.row.saved,.row.saving::after,.pane.active,.status.busy::before{animation:none!important}
+  .app.loading .kpi .v::after,.app.loading #budget::after{animation:none!important}
+}
 </style>
 </head>
 <body>
 
 
-<div class="app">
+<div class="loadbar" aria-hidden="true"></div>
+<div class="app loading">
   <aside class="side">
     <div class="brand">
       <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 4a8 8 0 1 1-7.4 5"/><path d="M12 4v8h8" opacity=".55"/></svg></div>
@@ -625,31 +668,46 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
     if(d.url){ $('sheetUrl').href = d.url; }
     render();
   }
+  let busyN = 0;
+  function busy(on){ busyN = Math.max(0, busyN + (on?1:-1)); document.body.classList.toggle('is-busy', busyN>0); }
+  const call = (fn, ...args) => { busy(true); return run(fn, ...args).finally(() => busy(false)); };
+  let loaded = false, prevIds = null;
+  const pendingIds = new Set(), savedIds = new Set();
+  function tween(el, to, suffix){
+    suffix = suffix || '';
+    const from = Number(el.dataset.v || 0); el.dataset.v = to;
+    if(!loaded || from===to || matchMedia('(prefers-reduced-motion: reduce)').matches){ el.textContent = fmt(to)+suffix; return; }
+    const t0 = performance.now(), d = 520;
+    cancelAnimationFrame(el._raf);
+    const step = t => { const k = Math.min(1,(t-t0)/d), e = 1-Math.pow(1-k,3); el.textContent = fmt(from+(to-from)*e)+suffix; if(k<1) el._raf = requestAnimationFrame(step); };
+    el._raf = requestAnimationFrame(step);
+  }
   function gasStore(){
     let chain = Promise.resolve(), pending = 0;
     const q = fn => { const pr = chain.then(fn); chain = pr.catch(()=>{}); return pr; };
     const nid = pfx => pfx + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-    function mut(local, fn, args){
+    function mut(local, fn, args, id){
+      if(id) pendingIds.add(id);
       local(); render(); pending++; setStatus('Enregistrement…','busy');
-      return q(() => run(fn, ...args)).then(d => { pending--; if(!pending){ apply(d); setStatus('Enregistré dans Google Sheets'); } })
-        .catch(err => { pending--; console.error(err); setStatus('Échec de l’enregistrement','err'); if(needsSetup(err)) showSetup(errText(err)); else banner(errText(err)); refresh(); throw err; });
+      return q(() => call(fn, ...args)).then(d => { pending--; if(id){ pendingIds.delete(id); savedIds.add(id); } if(!pending){ apply(d); setStatus('Enregistré dans Google Sheets'); } else render(); })
+        .catch(err => { pending--; if(id) pendingIds.delete(id); console.error(err); setStatus('Échec de l’enregistrement','err'); if(needsSetup(err)) showSetup(errText(err)); else banner(errText(err)); refresh(); throw err; });
     }
     function refresh(){
       if(pending) return Promise.resolve();
       setStatus('Lecture du classeur…','busy');
-      return run('getData').then(d => { apply(d); setStatus('Enregistré dans Google Sheets'); banner(null); $('setup').hidden = true; })
-        .catch(err => { console.error(err); setStatus('Lecture impossible','err'); if(needsSetup(err)) showSetup(errText(err)); else banner(errText(err)); });
+      return call('getData').then(d => { loaded = true; document.querySelector('.app').classList.remove('loading'); apply(d); setStatus('Enregistré dans Google Sheets'); banner(null); $('setup').hidden = true; })
+        .catch(err => { console.error(err); document.querySelector('.app').classList.remove('loading'); setStatus('Lecture impossible','err'); if(needsSetup(err)) showSetup(errText(err)); else banner(errText(err)); });
     }
     return {
       refresh,
       start(){ refresh(); },
-      add(e){ const it = {...e, id:nid('d')}; return mut(() => { expenses = expenses.concat([it]); }, 'addExpense', [it]); },
-      update(id, p){ return mut(() => { expenses = expenses.map(x => x.id===id ? {...x, ...p} : x); }, 'updateExpense', [id, p]); },
+      add(e){ const it = {...e, id:nid('d')}; return mut(() => { expenses = expenses.concat([it]); }, 'addExpense', [it], it.id); },
+      update(id, p){ return mut(() => { expenses = expenses.map(x => x.id===id ? {...x, ...p} : x); }, 'updateExpense', [id, p], id); },
       remove(id){ return mut(() => { expenses = expenses.filter(x => x.id!==id); }, 'deleteExpense', [id]); },
       setBudget(m, v){ return mut(() => { budgets = {...budgets, [m]:v}; }, 'setBudget', [m, v]); },
       setGoal(v){ return mut(() => { goal = v; }, 'setGoal', [v]); },
-      addEss(e){ const it = {...e, id:nid('s')}; return mut(() => { essentials = essentials.concat([it]); }, 'addEssential', [it]); },
-      updateEss(id, p){ return mut(() => { essentials = essentials.map(x => x.id===id ? {...x, ...p} : x); }, 'updateEssential', [id, p]); },
+      addEss(e){ const it = {...e, id:nid('s')}; return mut(() => { essentials = essentials.concat([it]); }, 'addEssential', [it], it.id); },
+      updateEss(id, p){ return mut(() => { essentials = essentials.map(x => x.id===id ? {...x, ...p} : x); }, 'updateEssential', [id, p], id); },
       removeEss(id){ return mut(() => { essentials = essentials.filter(x => x.id!==id); }, 'deleteEssential', [id]); }
     };
   }
@@ -672,8 +730,8 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
     const reste = budget - total;
 
     if(document.activeElement !== $('budget')) $('budget').value = budget ? fmt(budget) : '';
-    $('total').textContent = fmt(total);
-    $('reste').textContent = fmt(reste);
+    tween($('total'), total);
+    tween($('reste'), reste);
     $('resteWrap').classList.toggle('neg', reste < 0); $('resteWrap').classList.toggle('pos', budget>0 && reste > 0);
     $('ringReste').textContent = fmt(Math.max(0,reste))+' Ar';
     { const pv = shiftMonth(month,-1), prow = monthRows(pv), ptot = prow.reduce((s,e)=>s+(Number(e.amount)||0),0), pb = budgets[pv]||0;
@@ -691,7 +749,7 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
       if(cm===month){ const last=new Date(n.getFullYear(), n.getMonth()+1, 0).getDate(), left=last-n.getDate(); $('sideDays').textContent = left ? plural(left,'jour')+' avant la fin du mois' : 'Dernier jour du mois'; }
       else $('sideDays').textContent = month<cm ? 'Mois terminé' : 'Mois à venir'; }
     $('rowCount').textContent = rows.length ? plural(rows.length,'ligne')+' · '+rows.filter(e=>e.paid).length+' payée'+(rows.filter(e=>e.paid).length>1?'s':'') : '';
-    $('footTotal').textContent = fmt(total) + ' Ar';
+    tween($('footTotal'), total, ' Ar');
     $('paidSum').textContent = fmt(paid) + ' Ar';
     $('unpaidSum').textContent = fmt(total-paid) + ' Ar';
     const base = Math.max(budget,total) || 1;
@@ -704,7 +762,7 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
     const focused = document.activeElement && document.activeElement.closest('.row') ? document.activeElement.dataset.key : null;
     const ul = $('rows'); ul.innerHTML='';
     rows.forEach(e=>{
-      const li = document.createElement('li'); li.className='row has-star'+(e.paid?' is-paid':''); li.dataset.id=e.id;
+      const li = document.createElement('li'); li.className='row has-star'+(e.paid?' is-paid':'')+(prevIds && !prevIds.has(e.id) ? ' enter' : '')+(pendingIds.has(e.id)?' saving':'')+(savedIds.has(e.id)?' saved':''); li.dataset.id=e.id;
       const isEss = !!findEss(e.label);
       li.innerHTML =
         '<button type="button" class="chk" aria-pressed="'+(!!e.paid)+'" aria-label="Payé">'+(e.paid?'Payé':'À payer')+'</button>'+
@@ -717,7 +775,9 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
       ul.appendChild(li);
     });
     if(focused){ const el=document.querySelector('[data-key="'+focused+'"]'); if(el) el.focus(); }
-    $('empty').hidden = rows.length>0;
+    prevIds = loaded ? new Set(expenses.map(x=>x.id)) : null; savedIds.clear();
+    if(!loaded){ ul.innerHTML = Array.from({length:6}, () => '<li class="row has-star skel-row"><span class="skel s1"></span><span class="skel s2"></span><span class="skel s3"></span><span></span><span></span></li>').join(''); }
+    $('empty').hidden = !loaded || rows.length>0;
     $('copyPrev').hidden = monthRows(shiftMonth(month,-1)).length===0;
 
     // breakdown + ring (same colour per expense in both)
@@ -745,7 +805,7 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
     const eFocused = document.activeElement && document.activeElement.closest('#essRows') ? document.activeElement.dataset.key : null;
     const eul=$('essRows'); eul.innerHTML='';
     essSorted.forEach(e=>{
-      const li=document.createElement('li'); li.className='row'; li.dataset.id=e.id;
+      const li=document.createElement('li'); li.className='row'+(pendingIds.has(e.id)?' saving':''); li.dataset.id=e.id;
       li.innerHTML='<input type="text" class="lab" id="elab-'+e.id+'" data-key="elab-'+e.id+'" aria-label="Dépense essentielle">'+
         '<input type="text" class="amt" id="eamt-'+e.id+'" data-key="eamt-'+e.id+'" inputmode="numeric" aria-label="Montant habituel">'+
         '<button type="button" class="del" aria-label="Supprimer">×</button>';
@@ -937,7 +997,7 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
 
     $('svTotal').textContent = fmt(cum)+' Ar';
     $('svTotal').classList.toggle('neg', cum<0); $('svTotal').classList.toggle('pos', cum>0);
-    $('kpiSave').textContent = fmt(cum);
+    tween($('kpiSave'), cum);
     $('kpiSaveSub').textContent = data.length ? (goal>0 ? Math.round(Math.max(0,cum)/goal*100)+' % de l\u2019objectif' : data.length+' mois suivis') : 'Aucun mois suivi';
     if(data.length){
       const avg = cum/data.length;
@@ -1015,7 +1075,7 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
     }
     const del=ev.target.closest('.del');
     if(del){
-      if(del.classList.contains('confirm')){ store.remove(id).then(()=>toast('Ligne supprimée')).catch(fail); }
+      if(del.classList.contains('confirm')){ li.classList.add('leaving'); setTimeout(()=>store.remove(id).then(()=>toast('Ligne supprimée')).catch(fail), 240); }
       else { del.classList.add('confirm'); del.textContent='Suppr.?'; setTimeout(()=>{ if(del.isConnected){ del.classList.remove('confirm'); del.textContent='×'; } },3000); }
     }
   });
@@ -1045,7 +1105,7 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
   $('essRows').addEventListener('keydown',ev=>{ if(ev.key==='Enter' && ev.target.tagName==='INPUT') ev.target.blur(); });
   $('essRows').addEventListener('click',ev=>{
     const del=ev.target.closest('.del'); if(!del) return; const id=del.closest('.row').dataset.id;
-    if(del.classList.contains('confirm')) store.removeEss(id).then(()=>toast('Dépense essentielle supprimée')).catch(fail);
+    if(del.classList.contains('confirm')){ del.closest('.row').classList.add('leaving'); setTimeout(()=>store.removeEss(id).then(()=>toast('Dépense essentielle supprimée')).catch(fail), 240); }
     else { del.classList.add('confirm'); del.textContent='Suppr.?'; setTimeout(()=>{ if(del.isConnected){ del.classList.remove('confirm'); del.textContent='×'; } },3000); }
   });
   $('essFromMonth').addEventListener('click', async ()=>{
