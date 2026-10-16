@@ -60,6 +60,12 @@ button{cursor:pointer}
 .tabs .badge{margin-left:auto;font-size:.7rem;font-weight:700;min-width:20px;padding:1px 6px;border-radius:99px;background:var(--warn);color:var(--nav);text-align:center}
 .side-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding:0}
 .side-foot .status{padding:0 4px}
+.side-foot .status.err::before{background:#FF8A80}
+.side-foot .status.busy::before{background:#F5BE6B}
+.sheet-links{display:flex;gap:6px;padding:0 4px}
+.sheet-links a,.sheet-links button{flex:1;text-align:center;font-size:.74rem;font-weight:600;color:#fff;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:6px 8px;text-decoration:none}
+.sheet-links a:hover,.sheet-links button:hover{background:rgba(255,255,255,.18)}
+.sheet-banner{display:none}
 .side-foot .status{font-size:.72rem;color:var(--nav-muted);margin:0;display:flex;align-items:center;gap:7px}
 .side-foot .status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--pos);flex:none}
 .side-month{display:flex;flex-direction:column;gap:3px;padding:12px;border:1px solid var(--nav-active);border-radius:10px;background:var(--nav-hover);margin-bottom:6px}
@@ -379,6 +385,10 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
         <span class="sm-s" id="sideDays"></span>
       </div>
       <p class="status" id="status">Chargement…</p>
+      <div class="sheet-links" id="sheetLinks" hidden>
+        <a href="https://docs.google.com/spreadsheets/d/1Ld1XuciNUPi7fpzdPtfrtAwjDbl82xcaDVYrQpwAkMc/edit" target="_blank" rel="noopener">Ouvrir le classeur</a>
+        <button type="button" id="syncNow">Actualiser</button>
+      </div>
     </div>
   </aside>
 
@@ -582,7 +592,6 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
       start(){
         db.collection('expenses').onSnapshot(snap=>{
           expenses = snap.docs.map(d=>({id:d.id, ...d.data()}));
-          $('status').textContent = 'Données enregistrées automatiquement.';
           render();
         }, e=>{ console.error(e); $('status').textContent='Connexion perdue. Rechargez la page.'; });
         db.collection('months').onSnapshot(snap=>{
@@ -599,6 +608,86 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
       update(id,p){ return db.doc('expenses/'+id).update(p); },
       remove(id){ return db.doc('expenses/'+id).delete(); },
       setBudget(m,v){ return db.doc('months/'+m).set({budget:v}); }
+    };
+  }
+
+  /* ---------- Google Sheets store (the workbook is the source of truth) ---------- */
+  const SHEET_ID = '1Ld1XuciNUPi7fpzdPtfrtAwjDbl82xcaDVYrQpwAkMc';
+  function setStatus(text, kind){ const el=$('status'); el.textContent=text; el.classList.toggle('err', kind==='err'); el.classList.toggle('busy', kind==='busy'); }
+  function sheetErrText(e){
+    const c = e && e.code;
+    if(c==='needs_reauth') return 'Connexion Google expirée : reconnectez Google Sheets dans claude.ai, Paramètres, Connecteurs.';
+    if(c==='server_not_connected' || c==='selection_required') return 'Google Sheets n’est pas connecté : ajoutez-le dans claude.ai, Paramètres, Connecteurs.';
+    if(c==='not_in_manifest' || c==='approval_required' || c==='consent_required') return 'Accès à Google Sheets non autorisé pour cette page.';
+    if(c==='server_unavailable' || c==='upstream_error') return 'Google Sheets ne répond pas. Réessayez dans un instant.';
+    if(c==='tool_error') return 'Google Sheets a refusé l’opération. Vérifiez que le classeur « Budget Mahery » existe toujours.';
+    if(c==='missing') return 'Cette ligne n’existe plus dans le classeur. Données rechargées.';
+    return 'La synchronisation avec Google Sheets a échoué.';
+  }
+  function sheetStore(mcp){
+    const S='Google Sheets';
+    const T={exp:"'Dépenses'", bud:"Budgets", ess:"Essentielles", par:"'Paramètres'"};
+    const call=(tool,input)=>mcp.callTool(S,tool,Object.assign({spreadsheetId:SHEET_ID},input),{cache:false}).then(r=>r.payload);
+    const vals=async range=>{ const p=await call('get_values',{range}); return (p && p.values) || []; };
+    const isTrue=v=>/^(true|vrai|oui|1)$/i.test(String(v==null?'':v).trim());
+    const txt=v=>String(v==null?'':v).replace(/^'/,'').trim();
+    const num=v=>parseAmt(v);
+    let chain=Promise.resolve(); const q=fn=>{ const pr=chain.then(fn); chain=pr.catch(()=>{}); return pr; };
+    let pending=0, okText='Synchronisé avec Google Sheets';
+
+    async function load(){
+      const [e,b,s,p]=await Promise.all([vals(T.exp+'!A2:F'),vals(T.bud+'!A2:B'),vals(T.ess+'!A2:D'),vals(T.par+'!A2:B')]);
+      expenses=e.filter(r=>txt(r[0])).map(r=>({id:txt(r[0]),month:txt(r[1]),label:txt(r[2]).toUpperCase(),amount:num(r[3]),paid:isTrue(r[4]),createdAt:num(r[5])}));
+      const bb={}; b.forEach(r=>{ const m=txt(r[0]); if(m) bb[m]=num(r[1]); }); budgets=bb;
+      essentials=s.filter(r=>txt(r[0])).map(r=>({id:txt(r[0]),label:txt(r[1]).toUpperCase(),amount:num(r[2]),createdAt:num(r[3])}));
+      let g=0; p.forEach(r=>{ if(/objectif/i.test(txt(r[0]))) g=num(r[1]); }); goal=g;
+      render();
+    }
+    async function rowOf(tab,key){
+      const col=await vals(tab+'!A2:A'); let empty=-1;
+      for(let i=0;i<col.length;i++){ const v=txt(col[i] && col[i][0]); if(v===key) return {row:i+2,found:true}; if(!v && empty<0) empty=i+2; }
+      return {row: empty>0 ? empty : col.length+2, found:false};
+    }
+    const write=(tab,row,arr)=>call('update_values',{range:tab+'!A'+row,values:[arr]});
+    const delRow=(sheetId,row)=>call('update_spreadsheet',{requests:[{deleteDimension:{range:{sheetId,dimension:'ROWS',startIndex:row-1,endIndex:row}}}]});
+    const expRow=e=>[e.id,"'"+e.month,e.label,Number(e.amount)||0,!!e.paid,e.createdAt||0];
+    const essRow=e=>[e.id,e.label,Number(e.amount)||0,e.createdAt||0];
+    const nid=pfx=>pfx+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+    function mut(local, remote){
+      local(); render(); pending++; setStatus('Enregistrement dans Google Sheets…','busy');
+      return q(remote).then(()=>{ pending--; if(!pending) setStatus(okText); })
+        .catch(err=>{ pending--; console.error(err); setStatus(sheetErrText(err),'err'); toast(sheetErrText(err)); load().catch(()=>{}); throw err; });
+    }
+    function refresh(){
+      if(pending) return Promise.resolve();
+      setStatus('Lecture du classeur…','busy');
+      return load().then(()=>setStatus(okText)).catch(err=>{ console.error(err); setStatus(sheetErrText(err),'err'); });
+    }
+    return {
+      kind:'sheet',
+      firstLoad: load,
+      start(){
+        setStatus(okText); $('sheetLinks').hidden=false;
+        $('syncNow').addEventListener('click',()=>refresh().then(()=>toast('Données relues depuis Google Sheets')));
+        document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') refresh(); });
+      },
+      add(e){ const it={...e,id:nid('d')};
+        return mut(()=>{ expenses=expenses.concat([it]); }, async()=>{ const r=await rowOf(T.exp,it.id); await write(T.exp,r.row,expRow(it)); }); },
+      update(id,p){ let it=null;
+        return mut(()=>{ expenses=expenses.map(x=>x.id===id?(it={...x,...p}):x); }, async()=>{ if(!it) return; const r=await rowOf(T.exp,id); if(!r.found) throw {code:'missing'}; await write(T.exp,r.row,expRow(it)); }); },
+      remove(id){
+        return mut(()=>{ expenses=expenses.filter(x=>x.id!==id); }, async()=>{ const r=await rowOf(T.exp,id); if(r.found) await delRow(1,r.row); }); },
+      setBudget(m,v){
+        return mut(()=>{ budgets={...budgets,[m]:v}; }, async()=>{ const r=await rowOf(T.bud,m); await write(T.bud,r.row,["'"+m,v]); }); },
+      setGoal(v){
+        return mut(()=>{ goal=v; }, async()=>{ await write(T.par,2,["Objectif d'épargne (Ar)",v]); }); },
+      addEss(e){ const it={...e,id:nid('s')};
+        return mut(()=>{ essentials=essentials.concat([it]); }, async()=>{ const r=await rowOf(T.ess,it.id); await write(T.ess,r.row,essRow(it)); }); },
+      updateEss(id,p){ let it=null;
+        return mut(()=>{ essentials=essentials.map(x=>x.id===id?(it={...x,...p}):x); }, async()=>{ if(!it) return; const r=await rowOf(T.ess,id); if(!r.found) throw {code:'missing'}; await write(T.ess,r.row,essRow(it)); }); },
+      removeEss(id){
+        return mut(()=>{ essentials=essentials.filter(x=>x.id!==id); }, async()=>{ const r=await rowOf(T.ess,id); if(r.found) await delRow(3,r.row); }); }
     };
   }
 
@@ -746,7 +835,7 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
     if(!miss.length){ toast('Toutes les essentielles sont déjà dans ce mois'); return; }
     try{
       let t=Date.now();
-      for(const e of miss){ await store.add({month,label:norm(e.label),amount:Number(e.amount)||0,paid:false,createdAt:t++}); }
+      await Promise.all(miss.map(e=>store.add({month,label:norm(e.label),amount:Number(e.amount)||0,paid:false,createdAt:t++})));
       toast(miss.length+' dépense'+(miss.length>1?'s':'')+' essentielle'+(miss.length>1?'s':'')+' importée'+(miss.length>1?'s':''));
     }catch(e){ fail(e); }
   }
@@ -1030,7 +1119,8 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
   $('essFromMonth').addEventListener('click', async ()=>{
     try{
       let t=Date.now(), n=0;
-      for(const e of monthRows(month)){ if(!findEss(e.label)){ await store.addEss({label:norm(e.label),amount:Number(e.amount)||0,createdAt:t++}); n++; } }
+      const ps=[]; for(const e of monthRows(month)){ if(!findEss(e.label)){ ps.push(store.addEss({label:norm(e.label),amount:Number(e.amount)||0,createdAt:t++})); n++; } }
+      await Promise.all(ps);
       toast(n+' dépenses enregistrées comme essentielles');
     }catch(e){ fail(e); }
   });
@@ -1039,7 +1129,7 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
     const prev=shiftMonth(month,-1); const src=monthRows(prev);
     try{
       let t=Date.now();
-      for(const e of src){ await store.add({month,label:e.label,amount:e.amount,paid:false,createdAt:t++}); }
+      await Promise.all(src.map(e=>store.add({month,label:e.label,amount:e.amount,paid:false,createdAt:t++})));
       if(!budgets[month] && budgets[prev]) await store.setBudget(month,budgets[prev]);
       toast(src.length+' lignes reprises de '+monthName(prev));
     }catch(e){ fail(e); }
@@ -1061,13 +1151,20 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
   let started=false;
   function startWith(s,msg){ if(started) return; started=true; store=s; if(msg) $('status').textContent=msg; store.start(); }
   const fallbackMsg = 'Mode local : les données restent dans ce navigateur.';
-  if(window.claude && typeof window.claude.use==='function'){
-    window.claude.use('db').then(db=>{
-      startWith(db ? dbStore(db) : localStore(), db ? null : fallbackMsg);
-    }).catch(()=>startWith(localStore(), fallbackMsg));
-  } else {
-    startWith(localStore(), fallbackMsg);
+  async function boot(){
+    if(!(window.claude && typeof window.claude.use==='function')){ startWith(localStore(), fallbackMsg); return; }
+    let mcp=null; try{ mcp = await window.claude.use('mcp'); }catch(e){}
+    if(mcp){
+      const s = sheetStore(mcp);
+      setStatus('Connexion à Google Sheets…','busy');
+      try{ await s.firstLoad(); startWith(s); return; }
+      catch(err){ console.error(err); var sheetMsg = sheetErrText(err)+' Données affichées depuis la copie de secours, non synchronisées.'; }
+    }
+    let db=null; try{ db = await window.claude.use('db'); }catch(e){}
+    startWith(db ? dbStore(db) : localStore(), sheetMsg || (db ? 'Google Sheets indisponible ici : copie de secours, non synchronisée.' : fallbackMsg));
+    if(sheetMsg || db) $('status').classList.add('err');
   }
+  boot();
 })();
 </script>
 
