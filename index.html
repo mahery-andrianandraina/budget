@@ -437,11 +437,9 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
     </div>
     <form class="setup" id="setup" hidden autocomplete="off">
       <div class="setup-h">
-        <b>Relier l'application au classeur Budget Mahery</b>
+        <b>Clé d'accès au classeur Budget Mahery</b>
         <span id="setupMsg">À faire une seule fois sur chaque appareil.</span>
       </div>
-      <label for="cfgUrl">URL de l'application web Apps Script (se termine par /exec)</label>
-      <input id="cfgUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" required>
       <label for="cfgKey">Clé d'accès (dans le classeur : menu Budget → Créer / afficher la clé d'accès)</label>
       <input id="cfgKey" type="password" placeholder="Clé d'accès" required>
       <div class="btns"><button class="btn" type="submit">Relier</button><button class="btn ghost" type="button" id="setupCancel">Annuler</button></div>
@@ -598,12 +596,17 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
   /* ---------- Apps Script store: every change is written straight into the workbook ---------- */
   function setStatus(text, kind){ const el=$('status'); el.textContent=text; el.classList.toggle('err', kind==='err'); el.classList.toggle('busy', kind==='busy'); }
   // Liaison avec le classeur : la page appelle le script Apps Script (application web) avec une clé d'accès.
-  const CFG = { url:'budget-api-url', key:'budget-api-key' };
-  function cfgGet(){ try{ return { url: localStorage.getItem(CFG.url) || '', key: localStorage.getItem(CFG.key) || '' }; }catch(e){ return { url:'', key:'' }; } }
-  function cfgSet(url, key){ try{ localStorage.setItem(CFG.url, url); localStorage.setItem(CFG.key, key); }catch(e){} }
+  // ▼▼▼ COLLEZ ICI l'URL de votre déploiement Apps Script (elle se termine par /exec) ▼▼▼
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzD2m7QyDICR4N7UaWm3nF8VQQ0NE91jzRNNnNIiiuZVpkl8kl7KJ9kRqL2C6SthQRYfQ/exec';
+  // ▲▲▲ Ne mettez jamais la clé d'accès dans ce fichier : il est public sur GitHub. ▲▲▲
+  const CFG_KEY = 'budget-api-key';
+  const urlOk = () => /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API_URL);
+  function cfgGet(){ let key=''; try{ key = localStorage.getItem(CFG_KEY) || ''; }catch(e){} return { url: urlOk() ? API_URL : '', key }; }
+  function cfgSet(key){ try{ localStorage.setItem(CFG_KEY, key); }catch(e){} }
   const run = (fn, ...args) => {
     const c = cfgGet();
-    if(!c.url || !c.key) return Promise.reject(new Error('NO_CONFIG'));
+    if(!c.url) return Promise.reject(new Error('NO_URL'));
+    if(!c.key) return Promise.reject(new Error('NO_CONFIG'));
     return fetch(c.url, { method:'POST', body: JSON.stringify({ key:c.key, action:fn, args }) })
       .then(r => { if(!r.ok) throw new Error('Le script a répondu avec une erreur ' + r.status + '.'); return r.json(); })
       .then(j => { if(!j || !j.ok) throw new Error((j && j.error) || 'Réponse inattendue du script.'); return j.data; });
@@ -611,8 +614,9 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
   function needsSetup(err){ const m = String(err && err.message || err); return m==='NO_CONFIG' || /clé/i.test(m); }
   function errText(err){
     const m = String(err && err.message || err);
-    if(m==='NO_CONFIG') return 'L’application n’est pas encore reliée au classeur.';
-    if(/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'Le script Apps Script est injoignable. Vérifiez l’URL, et que le déploiement autorise « Tout le monde ».';
+    if(m==='NO_URL') return 'L’URL du déploiement Apps Script n’est pas encore collée dans index.html (constante API_URL).';
+    if(m==='NO_CONFIG') return 'Saisissez votre clé d’accès pour relier l’application au classeur.';
+    if(/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'Le script Apps Script est injoignable. Vérifiez l’URL dans index.html, et que le déploiement autorise « Tout le monde ».';
     return m;
   }
   function apply(d){
@@ -1077,13 +1081,13 @@ body{background:radial-gradient(900px 500px at 85% -10%,var(--glow-b),transparen
 
   /* ---------- Boot ---------- */
   function showSetup(msg){
-    const c = cfgGet(); $('cfgUrl').value = c.url; $('cfgKey').value = c.key;
+    const c = cfgGet(); $('cfgKey').value = c.key;
     $('setupMsg').textContent = msg || 'À faire une seule fois sur chaque appareil.';
     $('setup').hidden = false; banner(null);
   }
   $('setup').addEventListener('submit', ev => {
     ev.preventDefault();
-    cfgSet($('cfgUrl').value.trim(), $('cfgKey').value.trim());
+    cfgSet($('cfgKey').value.trim());
     $('setup').hidden = true; store.refresh();
   });
   $('setupCancel').addEventListener('click', () => { $('setup').hidden = true; });
