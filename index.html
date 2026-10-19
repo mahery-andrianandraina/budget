@@ -493,6 +493,48 @@ body.is-busy .loadbar{opacity:1}
   .card-h{flex-wrap:wrap}
   .card-h .hwrap{width:100%;justify-content:space-between}
 }
+
+/* ===== Envelopes and payments ===== */
+.row{position:relative}
+.row > i.prog{position:absolute;left:0;bottom:-1px;height:3px;border-radius:0 3px 3px 0;background:var(--brand);pointer-events:none;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.row > i.prog.done{background:var(--pos)} .row > i.prog.over{background:var(--neg)}
+.chk.part{background:var(--brand-soft);color:var(--brand)}
+.chk.over{background:var(--neg);color:#fff}
+.chk.over::before{background:#fff}
+.row.is-over input.amt{color:var(--neg)}
+.row.is-paid.is-over input.lab{color:var(--neg)}
+.dlg-tag.todo{background:var(--warn-soft);color:var(--warn)} .dlg-tag.part{background:var(--brand-soft);color:var(--brand)}
+.dlg-tag.done{background:var(--pos-soft);color:var(--pos)} .dlg-tag.over{background:var(--neg);color:#fff}
+.lp-sum{display:flex;justify-content:space-between;gap:12px}
+.lp-sum div{display:flex;flex-direction:column;gap:2px}
+.lp-sum div:last-child{text-align:right}
+.lp-sum b{font-family:var(--f-display);font-size:1.5rem;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.lp-track{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:-4px}
+.lp-track i{display:block;height:100%;border-radius:99px;background:var(--grad,var(--brand));transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.lp-track i.done{background:var(--pos)} .lp-track i.over{background:var(--neg)}
+.lp-left{font-weight:600;font-size:.9rem;color:var(--ink-2);margin-top:-6px}
+.lp-left.over{color:var(--neg)} .lp-left.done{color:var(--pos)}
+.lp-pace{margin:0;font-size:.84rem;color:var(--muted)}
+.lp-pace:empty{display:none}
+.lp-pace.warn{color:var(--warn);font-weight:500}
+.lp-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:end;padding:12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+.lp-form label{display:block;font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:4px}
+.lp-form input{width:100%;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 10px}
+.lp-form input:focus{border-color:var(--brand);outline:none}
+#lpAmt{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+#lpAll{align-self:flex-start;margin-top:-6px}
+.lp-list{list-style:none;margin:0;padding:0;max-height:220px;overflow-y:auto;border:1px solid var(--line);border-radius:12px}
+.lp-list li{display:grid;grid-template-columns:minmax(0,1fr) auto 30px;gap:10px;align-items:center;padding:8px 10px 8px 14px;border-bottom:1px solid var(--line);font-size:.86rem}
+.lp-list li:last-child{border-bottom:0}
+.lp-list li span{color:var(--ink-2);text-transform:capitalize}
+.lp-list li b{font-variant-numeric:tabular-nums}
+.lp-list li .del{opacity:1}
+.lp-list li.lp-empty{display:block;color:var(--muted);padding:14px}
+.lp-list li.lp-one{grid-template-columns:minmax(0,1fr) auto auto}
+.lp-list li.lp-one .btn{padding:5px 10px;font-size:.78rem}
+.toast.alert{background:var(--neg);color:#fff}
+#dlg{z-index:45}
+@media (max-width:520px){ .lp-form{grid-template-columns:1fr 1fr} .lp-form .btn{grid-column:1 / -1;justify-content:center} }
 </style>
 </head>
 <body>
@@ -585,7 +627,7 @@ body.is-busy .loadbar{opacity:1}
             <span class="d" id="pct">Saisissez un budget</span>
           </div>
           <div class="kpi">
-            <span class="cap">Dépensé</span>
+            <span class="cap">Prévu</span>
             <span class="v num"><span id="total">0</span><small>Ar</small></span>
             <div class="meter" id="bar"><i class="paid" id="barPaid"></i><i class="plan" id="barPlan"></i></div>
             <span class="d" id="totalDelta"></span>
@@ -629,9 +671,9 @@ body.is-busy .loadbar{opacity:1}
           <div class="ring-wrap">
             <svg id="ring" viewBox="0 0 132 132" role="img" aria-label="Répartition des dépenses"></svg>
             <div class="ring-legend">
-              <div><span><i style="background:var(--pos)"></i>Payé</span><b id="paidSum">0 Ar</b></div>
-              <div><span><i style="background:var(--warn)"></i>À payer</span><b id="unpaidSum">0 Ar</b></div>
-              <div><span><i style="background:var(--line)"></i>Reste</span><b id="ringReste">0 Ar</b></div>
+              <div><span><i style="background:var(--pos)"></i>Dépensé</span><b id="paidSum">0 Ar</b></div>
+              <div><span><i style="background:var(--warn)"></i>Reste à dépenser</span><b id="unpaidSum">0 Ar</b></div>
+              <div><span><i style="background:var(--line)"></i>Non prévu</span><b id="ringReste">0 Ar</b></div>
             </div>
           </div>
           <ul class="breakdown scroll" id="breakdown"></ul>
@@ -722,6 +764,27 @@ body.is-busy .loadbar{opacity:1}
     <div class="dlg-foot"><button class="btn ghost" type="button" id="dlgClose">Annuler</button></div>
   </div>
 </div>
+<div class="dlg-back" id="linePanel" hidden>
+  <div class="dlg lp" role="dialog" aria-modal="true" aria-labelledby="lpTitle">
+    <div class="dlg-h"><span class="dlg-tag" id="lpTag"></span><b id="lpTitle"></b></div>
+    <div class="lp-sum">
+      <div><span class="cap">Dépensé</span><b id="lpSpent">0 Ar</b></div>
+      <div><span class="cap">Enveloppe</span><b id="lpBudget">0 Ar</b></div>
+    </div>
+    <div class="lp-track"><i id="lpBar"></i></div>
+    <div class="lp-left" id="lpLeft"></div>
+    <p class="lp-pace" id="lpPace"></p>
+    <form class="lp-form" id="lpForm" autocomplete="off">
+      <div><label for="lpAmt">Montant du versement (Ar)</label><input id="lpAmt" inputmode="numeric" required></div>
+      <div><label for="lpDate">Date</label><input id="lpDate" type="date" required></div>
+      <button class="btn" type="submit">Ajouter</button>
+    </form>
+    <button class="btn ghost" type="button" id="lpAll">Tout régler</button>
+    <div class="dlg-sub">Versements <span id="lpCount"></span></div>
+    <ul class="lp-list" id="lpList"></ul>
+    <div class="dlg-foot"><button class="btn ghost" type="button" id="lpClose">Fermer</button></div>
+  </div>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -736,6 +799,7 @@ body.is-busy .loadbar{opacity:1}
   let expenses = [];     // {id, month, label, amount, paid, createdAt}
   let goal = 0;          // savings goal
   let essentials = [];
+  let payments = [];     // versements : {id, expenseId, date:'AAAA-MM-JJ', amount}
   let ceilings = {};     // DÉSIGNATION -> plafond mensuel (Ar)
   let reserve = 0;       // épargne protégée chaque mois (Ar)
   let sortDue = false; try{ sortDue = localStorage.getItem('budget-sort')==='due'; }catch(e){}   // {id, label, amount, createdAt} — user's recurring monthly expenses
@@ -744,14 +808,14 @@ body.is-busy .loadbar{opacity:1}
 
   function shiftMonth(m, d){ const [y,mo]=m.split('-').map(Number); const dt=new Date(y,mo-1+d,1); return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0'); }
   function monthName(m){ const [y,mo]=m.split('-').map(Number); return new Intl.DateTimeFormat('fr-FR',{month:'long',year:'numeric'}).format(new Date(y,mo-1,1)); }
-  function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('on'),1800); }
+  function toast(msg, kind){ const t=$('toast'); t.textContent=msg; t.classList.toggle('alert', kind==='alert'); t.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('on'), kind==='alert'?4000:2400); }
   function fail(e){ console.error(e); toast("L'enregistrement a échoué. Réessayez."); }
 
   /* ---------- Apps Script store: every change is written straight into the workbook ---------- */
   function setStatus(text, kind){ const el=$('status'); el.textContent=text; el.classList.toggle('err', kind==='err'); el.classList.toggle('busy', kind==='busy'); }
   // Liaison avec le classeur : la page appelle le script Apps Script (application web) avec une clé d'accès.
   // ▼▼▼ COLLEZ ICI l'URL de votre déploiement Apps Script (elle se termine par /exec) ▼▼▼
-  const API_URL = 'https://script.google.com/macros/s/AKfycbz0K2F8zfheUq6jA_-r0j8domvsqtJiV7QnT8VQm9N_5DMt_B7InIx7dRU4nsvZYBMjkA/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbwxl1YeTuNscs6eO0QmLReaDbEgzpAwJEKnaXzQ6btwKVRsbrdXCoPCnXu5TH5GivCVtA/exec';
   // ▲▲▲ Ne mettez jamais la clé d'accès dans ce fichier : il est public sur GitHub. ▲▲▲
   const CFG_KEY = 'budget-api-key';
   const urlOk = () => /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API_URL);
@@ -776,7 +840,7 @@ body.is-busy .loadbar{opacity:1}
   function apply(d){
     if(!d) return;
     expenses = d.expenses || []; budgets = d.budgets || {}; essentials = d.essentials || []; goal = Number(d.goal) || 0;
-    ceilings = d.ceilings || {}; reserve = Number(d.reserve) || 0;
+    ceilings = d.ceilings || {}; reserve = Number(d.reserve) || 0; payments = d.payments || [];
     if(d.url){ $('sheetUrl').href = d.url; }
     render();
   }
@@ -815,7 +879,9 @@ body.is-busy .loadbar{opacity:1}
       start(){ refresh(); },
       add(e){ const it = {...e, id:nid('d')}; return mut(() => { expenses = expenses.concat([it]); }, 'addExpense', [it], it.id); },
       update(id, p){ return mut(() => { expenses = expenses.map(x => x.id===id ? {...x, ...p} : x); }, 'updateExpense', [id, p], id); },
-      remove(id){ return mut(() => { expenses = expenses.filter(x => x.id!==id); }, 'deleteExpense', [id]); },
+      remove(id){ return mut(() => { expenses = expenses.filter(x => x.id!==id); payments = payments.filter(x => x.expenseId!==id); }, 'deleteExpense', [id]); },
+      addPayment(pm){ const it = {...pm, id:nid('p')}; return mut(() => { payments = payments.concat([it]); }, 'addPayment', [it], pm.expenseId); },
+      removePayment(id){ const pm = payments.find(x=>x.id===id); return mut(() => { payments = payments.filter(x => x.id!==id); }, 'deletePayment', [id], pm && pm.expenseId); },
       setBudget(m, v){ return mut(() => { budgets = {...budgets, [m]:v}; }, 'setBudget', [m, v]); },
       setGoal(v){ return mut(() => { goal = v; }, 'setGoal', [v]); },
       setReserve(v){ return mut(() => { reserve = v; }, 'setReserve', [v]); },
@@ -840,7 +906,7 @@ body.is-busy .loadbar{opacity:1}
     const rows = monthRows(month);
     const budget = budgets[month] || 0;
     const total = rows.reduce((s,e)=>s+(Number(e.amount)||0),0);
-    const paid = rows.filter(e=>e.paid).reduce((s,e)=>s+(Number(e.amount)||0),0);
+    const paid = rows.reduce((s,e)=>s+spentOf(e),0);
     const reste = budget - total;
     const availNow = budget - reserve - paid;
 
@@ -863,10 +929,10 @@ body.is-busy .loadbar{opacity:1}
     { const n=new Date(), cm=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
       if(cm===month){ const last=new Date(n.getFullYear(), n.getMonth()+1, 0).getDate(), left=last-n.getDate(); $('sideDays').textContent = left ? plural(left,'jour')+' avant la fin du mois' : 'Dernier jour du mois'; }
       else $('sideDays').textContent = month<cm ? 'Mois terminé' : 'Mois à venir'; }
-    $('rowCount').innerHTML = rows.length ? plural(rows.length,'ligne')+' · '+rows.filter(e=>e.paid).length+' payée'+(rows.filter(e=>e.paid).length>1?'s':'')+(budget ? ' · disponible <span class="avail'+(availNow<=0?' neg':'')+'">'+fmt(Math.max(0,availNow))+' Ar</span>' : '') : '';
+    $('rowCount').innerHTML = rows.length ? plural(rows.length,'ligne')+' · '+rows.filter(settled).length+' réglée'+(rows.filter(settled).length>1?'s':'')+(budget ? ' · disponible <span class="avail'+(availNow<=0?' neg':'')+'">'+fmt(Math.max(0,availNow))+' Ar</span>' : '') : '';
     tween($('footTotal'), total, ' Ar');
     $('paidSum').textContent = fmt(paid) + ' Ar';
-    $('unpaidSum').textContent = fmt(total-paid) + ' Ar';
+    $('unpaidSum').textContent = fmt(rows.reduce((s,e)=>s+leftOf(e),0)) + ' Ar';
     const base = Math.max(budget,total) || 1;
     $('barPaid').style.width = (paid/base*100)+'%';
     $('barPlan').style.width = ((total-paid)/base*100)+'%';
@@ -876,15 +942,14 @@ body.is-busy .loadbar{opacity:1}
     // rows — keep focus on the field being edited
     const focused = document.activeElement && document.activeElement.closest('.row') ? document.activeElement.dataset.key : null;
     const ul = $('rows'); ul.innerHTML='';
-    if(sortDue) rows.sort((a,b)=>(a.paid-b.paid) || ((a.due||99)-(b.due||99)) || ((a.createdAt||0)-(b.createdAt||0)));
+    if(sortDue) rows.sort((a,b)=>(settled(a)-settled(b)) || ((a.due||99)-(b.due||99)) || ((a.createdAt||0)-(b.createdAt||0)));
     $('sortDue').setAttribute('aria-pressed', String(sortDue));
     rows.forEach(e=>{
       const ds = dueState(e, month), capV = ceilings[norm(e.label)], overCap = capV && capUse(e.label, month) > capV;
-      const li = document.createElement('li'); li.className='row has-star'+(ds?' due-'+ds:'')+(overCap?' over-cap':'')+(e.paid?' is-paid':'')+(prevIds && !prevIds.has(e.id) ? ' enter' : '')+(pendingIds.has(e.id)?' saving':'')+(savedIds.has(e.id)?' saved':''); li.dataset.id=e.id;
+      const li = document.createElement('li'); li.className='row has-star'+(ds?' due-'+ds:'')+(overCap?' over-cap':'')+(settled(e)?' is-paid':'')+(stateOf(e)==='over'?' is-over':'')+(prevIds && !prevIds.has(e.id) ? ' enter' : '')+(pendingIds.has(e.id)?' saving':'')+(savedIds.has(e.id)?' saved':''); li.dataset.id=e.id;
       const isEss = !!findEss(e.label);
       li.innerHTML =
-        '<button type="button" class="chk'+(!e.paid && budget && (Number(e.amount)||0) > availNow ? ' cant' : '')+'" aria-pressed="'+(!!e.paid)+'" aria-label="Payé" title="'+(!e.paid && budget && (Number(e.amount)||0) > availNow ? 'Budget insuffisant pour payer cette ligne' : '')+'">'+(e.paid?'Payé':(!e.paid && budget && (Number(e.amount)||0) > availNow ? 'Insuffisant' : 'À payer'))+'</button>'+
-        '<input type="text" class="lab" id="lab-'+e.id+'" data-key="lab-'+e.id+'" aria-label="Dépense">'+
+        pill(e, availNow)+        '<input type="text" class="lab" id="lab-'+e.id+'" data-key="lab-'+e.id+'" aria-label="Dépense">'+
         '<input type="text" class="due" id="due-'+e.id+'" data-key="due-'+e.id+'" inputmode="numeric" maxlength="2" placeholder="—" aria-label="Jour d\u2019échéance" title="'+(ds==='late'?'En retard':ds==='soon'?'À payer bientôt':'Jour du mois')+'">'+
         '<input type="text" class="amt" id="amt-'+e.id+'" data-key="amt-'+e.id+'" inputmode="numeric" aria-label="Montant"'+(overCap?' title="Plafond de '+fmt(capV)+' Ar dépassé"':'')+'>'+
         '<span class="acts"><button type="button" class="star" aria-pressed="'+isEss+'" title="'+(isEss?'Retirer des essentielles':'Ajouter aux essentielles')+'" aria-label="Dépense essentielle">'+(isEss?'★':'☆')+'</button>'+
@@ -892,6 +957,7 @@ body.is-busy .loadbar{opacity:1}
       li.querySelector('.lab').value = e.label || '';
       li.querySelector('.amt').value = fmt(e.amount);
       li.querySelector('.due').value = e.due ? e.due : '';
+      { const a=Number(e.amount)||0, sp=spentOf(e); if(sp>0){ const pr=document.createElement('i'); pr.className='prog '+stateOf(e); pr.style.width=Math.min(100, a? sp/a*100 : 100)+'%'; li.appendChild(pr); } }
       ul.appendChild(li);
     });
     if(focused){ const el=document.querySelector('[data-key="'+focused+'"]'); if(el) el.focus(); }
@@ -997,11 +1063,41 @@ body.is-busy .loadbar{opacity:1}
     dl.innerHTML=''; [...opts].sort().forEach(v=>{ const o=document.createElement('option'); o.value=v; dl.appendChild(o); });
   }
 
+  function pill(e, availNow){
+    const st=stateOf(e), a=Number(e.amount)||0, sp=spentOf(e);
+    let cls='chk', txt='À payer', tip='Ouvrir les versements';
+    if(st==='over'){ cls+=' over'; txt='Dépassé'; tip='Dépassé de '+fmt(sp-a)+' Ar'; }
+    else if(st==='done'){ txt='Payé'; }
+    else if(st==='part'){ cls+=' part'; txt=Math.floor(sp/a*100)+' %'; tip=fmt(sp)+' / '+fmt(a)+' Ar dépensés'; }
+    else if(budgets[month] && leftOf(e) > availNow){ cls+=' cant'; txt='Insuffisant'; tip='Budget insuffisant pour cette ligne'; }
+    return '<button type="button" class="'+cls+'" aria-pressed="'+settled(e)+'" aria-label="Versements" title="'+tip+'">'+txt+'</button>';
+  }
+
+  /* ---------- Envelopes: a line is a budget, paid in one or several payments ---------- */
+  const paysOf = id => payments.filter(x=>x.expenseId===id).sort((a,b)=>(a.date<b.date?-1:a.date>b.date?1:0));
+  function spentOf(e){ const ps=paysOf(e.id); return ps.length ? ps.reduce((s,x)=>s+(Number(x.amount)||0),0) : (e.paid ? (Number(e.amount)||0) : 0); }
+  const leftOf = e => Math.max(0, (Number(e.amount)||0) - spentOf(e));
+  function stateOf(e){ const a=Number(e.amount)||0, sp=spentOf(e); if(a>0 && sp>a) return 'over'; if(sp>0 && sp>=a) return 'done'; if(sp>0) return 'part'; return 'todo'; }
+  const settled = e => { const st=stateOf(e); return st==='done' || st==='over'; };
+  const todayISO = () => { const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0'); };
+  function daysInfo(m){
+    const [y,mo]=m.split('-').map(Number), last=new Date(y,mo,0).getDate(), cm=thisMonth();
+    if(m===cm){ const d=new Date().getDate(); return {last, today:d, left:last-d+1}; }
+    return m<cm ? {last, today:last, left:0} : {last, today:0, left:last};
+  }
+  // Spending pace of a line in the current month: Ar per day since its first payment
+  function paceOf(e, m){
+    const ps=paysOf(e.id); if(ps.length<2 || m!==thisMonth()) return null;
+    const first=Number(ps[0].date.slice(8,10))||1, D=daysInfo(m), days=Math.max(1, D.today-first+1);
+    const rate=spentOf(e)/days, projected=spentOf(e)+rate*(D.left-1);
+    return {rate, projected, daysLeft:D.left};
+  }
+
   /* ---------- Due days ---------- */
   const thisMonth = () => { const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0'); };
   // 'late' | 'soon' | '' for an unpaid line of month m
   function dueState(e, m){
-    const d = Number(e.due)||0; if(!d || e.paid) return '';
+    const d = Number(e.due)||0; if(!d || settled(e)) return '';
     const cm = thisMonth();
     if(m < cm) return 'late';
     if(m > cm) return '';
@@ -1017,14 +1113,14 @@ body.is-busy .loadbar{opacity:1}
   /* ---------- Budget guard: you cannot pay more than the month's budget ---------- */
   function money(m){
     const rows = monthRows(m), b = budgets[m] || 0;
-    const paid = rows.filter(e=>e.paid).reduce((s,e)=>s+(Number(e.amount)||0),0);
+    const paid = rows.reduce((s,e)=>s+spentOf(e),0);
     const planned = rows.reduce((s,e)=>s+(Number(e.amount)||0),0);
     return { rows, b, paid, planned, spendable: Math.max(0, b - reserve), avail: b - reserve - paid };
   }
   const isEss = e => !!findEss(e.label);
   // Unpaid lines that could be postponed, non-essential and largest first
   function postponable(rows, exceptId){
-    return rows.filter(e=>!e.paid && e.id!==exceptId).sort((a,b)=>(isEss(a)-isEss(b)) || ((b.amount||0)-(a.amount||0)));
+    return rows.filter(e=>!settled(e) && spentOf(e)===0 && e.id!==exceptId).sort((a,b)=>(isEss(a)-isEss(b)) || ((b.amount||0)-(a.amount||0)));
   }
   // Smallest set of lines (non-essential first) that covers `need`
   function coverWith(list, need){
@@ -1050,45 +1146,109 @@ body.is-busy .loadbar{opacity:1}
   const postponeOpt = (e, why) => ({ label:'Reporter '+e.label+' au mois prochain', detail:fmt(e.amount)+' Ar'+(isEss(e)?' · dépense essentielle':'')+(why?' · '+why:''), cta:'Reporter',
     fn:()=>store.update(e.id,{month:shiftMonth(month,1), paid:false}).then(()=>toast(e.label+' reporté à '+monthName(shiftMonth(month,1)))).catch(fail) });
 
-  // Called when the user ticks "Payé"
-  function tryPay(e){
-    const M = money(month), amt = Number(e.amount)||0;
+  // Record a payment of `amt` on line e, with budget / envelope / essentials checks
+  function tryPayment(e, amt, date, o){
+    o = o || {};
+    amt = Math.round(Number(amt)||0); if(amt<=0) return toast('Saisissez un montant');
+    const M = money(month), sp = spentOf(e), a = Number(e.amount)||0;
     if(!M.b){
       return openDialog({ tag:'Budget manquant', warn:true, title:'Saisissez d’abord le budget du mois',
         text:'Sans budget, l’application ne peut pas vérifier que vous avez de quoi payer '+e.label+'.',
         opts:[{label:'Saisir le budget', detail:'Le champ Budget du mois s’ouvre', cta:'Saisir', primary:true, fn:()=>{ showTab('mois'); $('budget').focus(); }}] });
     }
+    // 1. hard limit: the month's budget (protected savings excluded)
     if(amt > M.avail){
       const need = amt - M.avail, opts = [];
-      if(M.avail > 0) opts.push({ label:'Payer '+fmt(M.avail)+' Ar maintenant', detail:'Le reste ('+fmt(need)+' Ar) devient une nouvelle ligne à payer', cta:'Payer en partie', primary:true,
-        fn:()=>{ store.update(e.id,{amount:M.avail, paid:true}).then(()=>store.add({month, label:e.label+' (RESTE)', amount:need, paid:false, createdAt:(e.createdAt||Date.now())+0.5, due:Number(e.due)||0})).then(()=>toast('Paiement partiel enregistré')).catch(fail); } });
-      opts.push(postponeOpt(e));
-      opts.push({ label:'Augmenter le budget à '+fmt(M.paid+amt+reserve)+' Ar', detail:'+'+fmt(need)+' Ar sur le budget de '+monthName(month), cta:'Augmenter',
-        fn:()=>store.setBudget(month, M.paid+amt+reserve).then(()=>store.update(e.id,{paid:true})).then(()=>toast('Budget augmenté et '+e.label+' payé')).catch(fail) });
-      if(reserve > 0) opts.push({ label:'Prendre '+fmt(Math.min(need,reserve))+' Ar sur l\u2019épargne protégée', detail: need<=reserve ? 'L\u2019épargne protégée passe à '+fmt(reserve-need)+' Ar ce mois-ci' : 'Ne suffit pas seul : il manquerait encore '+fmt(need-reserve)+' Ar', cta:'Utiliser',
-        fn:()=>{ if(need>reserve) return toast('L\u2019épargne protégée ne suffit pas'); store.setReserve(reserve-need).then(()=>store.update(e.id,{paid:true})).then(()=>toast(e.label+' payé avec l\u2019épargne protégée')).catch(fail); } });
-      const figs=[['Budget',fmt(M.b)+' Ar'],['Déjà payé',fmt(M.paid)+' Ar']];
+      if(M.avail > 0) opts.push({ label:'Verser seulement '+fmt(M.avail)+' Ar', detail:'Tout ce qui reste disponible ce mois-ci', cta:'Verser', primary:true, fn:()=>tryPayment(e, M.avail, date, o) });
+      if(sp===0) opts.push(postponeOpt(e));
+      opts.push({ label:'Augmenter le budget à '+fmt(M.b+need)+' Ar', detail:'+'+fmt(need)+' Ar sur le budget de '+monthName(month), cta:'Augmenter',
+        fn:()=>store.setBudget(month, M.b+need).then(()=>tryPayment(e, amt, date, o)).catch(fail) });
+      if(reserve >= need) opts.push({ label:'Prendre '+fmt(need)+' Ar sur l’épargne protégée', detail:'L’épargne protégée passe à '+fmt(reserve-need)+' Ar ce mois-ci', cta:'Utiliser',
+        fn:()=>store.setReserve(reserve-need).then(()=>tryPayment(e, amt, date, o)).catch(fail) });
+      const figs=[['Budget',fmt(M.b)+' Ar'],['Déjà dépensé',fmt(M.paid)+' Ar']];
       if(reserve>0) figs.push(['Épargne protégée',fmt(reserve)+' Ar']);
       figs.push(['Disponible',fmt(Math.max(0,M.avail))+' Ar',M.avail>0?'pos':'neg'],['Il manque',fmt(need)+' Ar','neg']);
-      return openDialog({ title:'Impossible de payer '+e.label,
-        text: M.avail>0 ? 'Il ne reste que '+fmt(M.avail)+' Ar à dépenser ce mois-ci'+(reserve>0?', épargne protégée mise à part.':'.') : (reserve>0 ? 'Le budget est utilisé jusqu\u2019à l\u2019épargne protégée.' : 'Le budget du mois est entièrement utilisé.'),
+      return openDialog({ title:'Impossible de verser '+fmt(amt)+' Ar pour '+e.label,
+        text: M.avail>0 ? 'Il ne reste que '+fmt(M.avail)+' Ar à dépenser ce mois-ci'+(reserve>0?', épargne protégée mise à part.':'.') : (reserve>0 ? 'Le budget est utilisé jusqu’à l’épargne protégée.' : 'Le budget du mois est entièrement utilisé.'),
         figs, opts });
     }
-    // Enough money, but paying a non-essential would leave essentials unpaid
-    if(!isEss(e)){
-      const essLeft = M.rows.filter(x=>!x.paid && x.id!==e.id && isEss(x));
-      const essSum = essLeft.reduce((s,x)=>s+(Number(x.amount)||0),0);
+    // 2. soft limit: the line's own envelope
+    if(!o.skipEnv && a>0 && sp+amt > a){
+      const over = sp+amt-a, left = Math.max(0, a-sp), opts=[];
+      if(left>0) opts.push({ label:'Verser seulement le reste : '+fmt(left)+' Ar', detail:'L’enveloppe de '+e.label+' sera juste atteinte', cta:'Verser', primary:true, fn:()=>tryPayment(e, left, date, {...o, skipEnv:true}) });
+      opts.push({ label:'Augmenter l’enveloppe à '+fmt(sp+amt)+' Ar', detail:'Puis enregistrer le versement', cta:'Augmenter', fn:()=>store.update(e.id,{amount:sp+amt}).then(()=>tryPayment({...e, amount:sp+amt}, amt, date, {...o, skipEnv:true})).catch(fail) });
+      opts.push({ label:'Enregistrer quand même', detail:e.label+' dépassera son enveloppe de '+fmt(over)+' Ar', cta:'Dépasser', fn:()=>tryPayment(e, amt, date, {...o, skipEnv:true}) });
+      return openDialog({ tag:'Enveloppe dépassée', title:e.label+' dépasserait son enveloppe',
+        text: left>0 ? 'Il ne reste que '+fmt(left)+' Ar sur les '+fmt(a)+' Ar prévus pour '+e.label+'.' : 'Les '+fmt(a)+' Ar prévus pour '+e.label+' sont déjà dépensés.',
+        figs:[['Enveloppe',fmt(a)+' Ar'],['Déjà dépensé',fmt(sp)+' Ar'],['Après versement',fmt(sp+amt)+' Ar','neg'],['Dépassement',fmt(over)+' Ar','neg']], opts });
+    }
+    // 3. advice: keep enough for unpaid essentials
+    if(!o.skipEss && !isEss(e)){
+      const essLeft = M.rows.filter(x=>x.id!==e.id && isEss(x) && leftOf(x)>0);
+      const essSum = essLeft.reduce((s,x)=>s+leftOf(x),0);
       if(essLeft.length && M.avail - amt < essSum){
         return openDialog({ tag:'Attention', warn:true, title:'Vos essentielles risquent de manquer',
-          text:'Après '+e.label+', il resterait '+fmt(M.avail-amt)+' Ar, alors que '+essLeft.map(x=>x.label).join(', ')+(essLeft.length>1?' coûtent':' coûte')+' encore '+fmt(essSum)+' Ar.',
-          figs:[['Disponible',fmt(M.avail)+' Ar'],['Après paiement',fmt(M.avail-amt)+' Ar'],['Essentielles à payer',fmt(essSum)+' Ar','neg']],
+          text:'Après ce versement, il resterait '+fmt(M.avail-amt)+' Ar, alors que '+essLeft.map(x=>x.label).join(', ')+(essLeft.length>1?' demandent':' demande')+' encore '+fmt(essSum)+' Ar.',
+          figs:[['Disponible',fmt(M.avail)+' Ar'],['Après versement',fmt(M.avail-amt)+' Ar'],['Essentielles restantes',fmt(essSum)+' Ar','neg']],
           optsTitle:'Que voulez-vous faire ?',
-          opts:[ postponeOpt(e,'garde l’argent pour les essentielles'),
-                 { label:'Payer '+e.label+' quand même', detail:'Les essentielles restantes devront attendre', cta:'Payer', fn:()=>store.update(e.id,{paid:true}).catch(fail) } ] });
+          opts:[ ...(sp===0 ? [postponeOpt(e,'garde l’argent pour les essentielles')] : []),
+                 { label:'Verser quand même', detail:'Les essentielles restantes devront attendre', cta:'Verser', fn:()=>tryPayment(e, amt, date, {...o, skipEss:true}) } ] });
       }
     }
-    store.update(e.id,{paid:true}).catch(fail);
+    recordPayment(e, amt, date, o);
   }
+  function recordPayment(e, amt, date, o){
+    const whole = o.full && !paysOf(e.id).length && amt === (Number(e.amount)||0);
+    const op = whole ? store.update(e.id,{paid:true}) : store.addPayment({expenseId:e.id, date:date||todayISO(), amount:amt});
+    op.then(()=>{
+      const x = expenses.find(y=>y.id===e.id) || e, a=Number(x.amount)||0, sp=spentOf(x);
+      if(sp > a) toast(x.label+' dépasse son enveloppe de '+fmt(sp-a)+' Ar', 'alert');
+      else if(o.full) toast(x.label+' payé');
+      else if(sp === a) toast(x.label+' : enveloppe entièrement utilisée');
+      else { const pc=paceOf(x, month); toast(x.label+' : '+fmt(sp)+' / '+fmt(a)+' Ar · reste '+fmt(a-sp)+' Ar'+(pc && pc.projected > a ? ' · attention au rythme' : '')); }
+      if(!$('linePanel').hidden) openLine(x);
+    }).catch(fail);
+  }
+  // "Tout payer" keeps the old one-tap behaviour
+  const tryPay = e => tryPayment(e, leftOf(e), todayISO(), {full:true});
+
+  /* ---------- Line panel: payments of one envelope ---------- */
+  let panelId = null;
+  function openLine(e){
+    panelId = e.id;
+    const x = expenses.find(y=>y.id===e.id) || e, a=Number(x.amount)||0, sp=spentOf(x), st=stateOf(x), ps=paysOf(x.id);
+    $('lpTag').textContent = {todo:'À payer', part:'En cours', done:'Réglée', over:'Dépassée'}[st];
+    $('lpTag').className = 'dlg-tag '+st;
+    $('lpTitle').textContent = x.label;
+    $('lpSpent').textContent = fmt(sp)+' Ar'; $('lpBudget').textContent = fmt(a)+' Ar';
+    const bar=$('lpBar'); bar.style.width = Math.min(100, a ? sp/a*100 : 0)+'%'; bar.className = st;
+    $('lpLeft').textContent = st==='over' ? 'Dépassée de '+fmt(sp-a)+' Ar' : 'Reste '+fmt(a-sp)+' Ar';
+    $('lpLeft').className = 'lp-left '+st;
+    const pc = paceOf(x, month), D = daysInfo(month);
+    let pace = '';
+    if(st!=='over' && st!=='done' && D.left>0 && a-sp>0) pace = 'Pour tenir jusqu’à la fin du mois : '+fmt(Math.floor((a-sp)/D.left))+' Ar par jour au maximum ('+plural(D.left,'jour')+').';
+    if(pc) pace = 'Rythme actuel : '+fmt(pc.rate)+' Ar par jour. '+(pc.projected > a ? 'À ce rythme, '+x.label+' atteindra '+fmt(pc.projected)+' Ar d’ici la fin du mois, soit '+fmt(pc.projected-a)+' Ar de trop.' : 'À ce rythme, l’enveloppe tient jusqu’à la fin du mois.')+(pace ? ' '+pace.replace('Pour tenir','Pour rester dans l’enveloppe') : '');
+    $('lpPace').textContent = pace; $('lpPace').className = 'lp-pace'+(pc && pc.projected > a ? ' warn' : '');
+    const last = ps.length ? Number(ps[ps.length-1].amount)||0 : 0;
+    if(document.activeElement !== $('lpAmt')) $('lpAmt').value = fmt(last || Math.min(a-sp>0 ? a-sp : a, a));
+    const [y,mo]=month.split('-'), lastDay=new Date(+y, +mo, 0).getDate();
+    $('lpDate').min = month+'-01'; $('lpDate').max = month+'-'+String(lastDay).padStart(2,'0');
+    const t=todayISO(); $('lpDate').value = t.slice(0,7)===month ? t : month+'-01';
+    $('lpAll').hidden = !(a-sp>0); $('lpAll').textContent = 'Tout régler ('+fmt(Math.max(0,a-sp))+' Ar)';
+    const ul=$('lpList'); ul.innerHTML='';
+    if(!ps.length && x.paid){ ul.innerHTML='<li class="lp-one"><span>Réglée en une fois</span><b>'+fmt(a)+' Ar</b><button type="button" class="btn ghost" data-unpay="1">Annuler le paiement</button></li>'; }
+    else if(!ps.length){ ul.innerHTML='<li class="lp-empty">Aucun versement. Notez chaque dépense au fur et à mesure (par exemple 2 000 Ar par jour) : l’application suit ce qu’il reste et vous prévient avant de dépasser.</li>'; }
+    ps.slice().reverse().forEach(pm=>{
+      const li=document.createElement('li'); li.dataset.pid=pm.id;
+      const d=new Date(pm.date+'T00:00:00'); const lbl = isNaN(d) ? pm.date : new Intl.DateTimeFormat('fr-FR',{weekday:'short', day:'numeric', month:'short'}).format(d);
+      li.innerHTML='<span></span><b></b><button type="button" class="del" aria-label="Supprimer le versement">×</button>';
+      li.children[0].textContent=lbl; li.children[1].textContent=fmt(pm.amount)+' Ar';
+      ul.appendChild(li);
+    });
+    $('lpCount').textContent = ps.length ? '· '+ps.length : '';
+    $('linePanel').hidden = false;
+  }
+  function closeLine(){ $('linePanel').hidden = true; panelId = null; }
 
   // Called before adding a new line
   function tryAdd(item, done, skipCap){
@@ -1138,7 +1298,7 @@ body.is-busy .loadbar{opacity:1}
   function stats(m){
     const rows = monthRows(m), b = budgets[m]||0;
     const d = rows.reduce((s,e)=>s+(Number(e.amount)||0),0);
-    const paid = rows.filter(e=>e.paid).reduce((s,e)=>s+(Number(e.amount)||0),0);
+    const paid = rows.reduce((s,e)=>s+spentOf(e),0);
     return {m, rows, b, d, paid, r:b-d, has: rows.length>0 || b>0};
   }
   function trackedMonths(){
@@ -1167,17 +1327,32 @@ body.is-busy .loadbar{opacity:1}
     // 0. lines that can no longer be paid
     if(cur.b){
       const avail = cur.b - reserve - cur.paid;
-      const cant = cur.rows.filter(e=>!e.paid && (Number(e.amount)||0) > avail);
-      const unpaidTot = cur.rows.filter(e=>!e.paid).reduce((s,e)=>s+(Number(e.amount)||0),0);
+      const cant = cur.rows.filter(e=>!settled(e) && leftOf(e) > avail);
+      const unpaidTot = cur.rows.reduce((s,e)=>s+leftOf(e),0);
       if(cant.length) out.push({lvl:'alert', t:plural(cant.length,'dépense')+' ne peu'+(cant.length>1?'vent':'t')+' plus être payée'+(cant.length>1?'s':''), x:cant.map(e=>e.label).join(', ')+'. Il reste '+fmt(Math.max(0,avail))+' Ar disponibles : reportez une ligne, payez en partie ou augmentez le budget.'});
       else if(unpaidTot > avail){
         const need = unpaidTot - avail, c = coverWith(postponable(cur.rows), need);
         out.push({lvl:'warn', t:'Le budget ne couvre pas tout ce qui reste à payer', x:'Il manque '+fmt(need)+' Ar.'+(c ? ' Reporter '+c.picked.map(e=>e.label).join(', ')+' au mois prochain suffirait.' : ''), act: c ? 'postpone:'+c.picked.map(e=>e.id).join(',') : null, actLbl:'Reporter'});
       }
-      const essUnpaid = cur.rows.filter(e=>!e.paid && isEss(e));
-      const essSum = essUnpaid.reduce((s,e)=>s+(Number(e.amount)||0),0);
+      const essUnpaid = cur.rows.filter(e=>leftOf(e)>0 && isEss(e));
+      const essSum = essUnpaid.reduce((s,e)=>s+leftOf(e),0);
       if(essUnpaid.length && essSum > avail) out.push({lvl:'alert', t:'Pas assez pour les essentielles', x:'Il faut encore '+fmt(essSum)+' Ar pour '+essUnpaid.map(e=>e.label).join(', ')+', mais seulement '+fmt(Math.max(0,avail))+' Ar sont disponibles.'});
       else if(essUnpaid.length) out.push({lvl:'info', t:'Payez d’abord les essentielles', x:essUnpaid.map(e=>e.label).join(', ')+' ('+fmt(essSum)+' Ar) : elles passent avant les autres dépenses.'});
+    }
+
+    // 0a. envelopes: overspent, almost used, pace too fast, daily allowance
+    cur.rows.forEach(e=>{
+      const a=Number(e.amount)||0, sp=spentOf(e), st=stateOf(e);
+      if(st==='over') out.push({lvl:'alert', t:e.label+' a dépassé son enveloppe', x:fmt(sp)+' Ar dépensés pour '+fmt(a)+' Ar prévus (+'+fmt(sp-a)+' Ar).'});
+      else if(st==='part'){
+        const pc=paceOf(e, month);
+        if(sp >= a*0.8) out.push({lvl:'warn', t:e.label+' : '+Math.floor(sp/a*100)+' % de l’enveloppe utilisé', x:'Il reste '+fmt(a-sp)+' Ar'+(pc && pc.daysLeft>0 ? ', soit '+fmt(Math.floor((a-sp)/pc.daysLeft))+' Ar par jour jusqu’à la fin du mois.' : '.')});
+        else if(pc && pc.projected > a) out.push({lvl:'warn', t:'À ce rythme, '+e.label+' va dépasser', x:fmt(pc.rate)+' Ar par jour mène à '+fmt(pc.projected)+' Ar en fin de mois pour '+fmt(a)+' Ar prévus. Limitez-vous à '+fmt(Math.floor((a-sp)/Math.max(1,pc.daysLeft)))+' Ar par jour.'});
+      }
+    });
+    if(cur.b && month===thisMonth()){
+      const D=daysInfo(month), avail=cur.b-reserve-cur.paid;
+      if(avail>0 && D.left>0) out.push({lvl:'info', t:'Vous pouvez dépenser '+fmt(Math.floor(avail/D.left))+' Ar par jour', x:fmt(avail)+' Ar disponibles pour les '+plural(D.left,'jour')+' qui restent'+(reserve>0?', épargne protégée mise à part.':'.')});
     }
 
     // 0b. due days: late and upcoming
@@ -1186,7 +1361,7 @@ body.is-busy .loadbar{opacity:1}
       const soon = cur.rows.filter(e=>dueState(e, month)==='soon').sort((a,b)=>(a.due||0)-(b.due||0));
       if(late.length) out.push({lvl:'alert', t:plural(late.length,'dépense')+' en retard', x:late.map(e=>e.label+' (échéance '+dueLabel(e.due)+', '+fmt(e.amount)+' Ar)').join(', ')+'.'});
       if(soon.length) out.push({lvl:'warn', t:'À payer dans les 3 prochains jours', x:soon.map(e=>e.label+' '+dueLabel(e.due)+' ('+fmt(e.amount)+' Ar)').join(', ')+'.'});
-      const next = cur.rows.filter(e=>!e.paid && e.due && !dueState(e, month)).sort((a,b)=>a.due-b.due).slice(0,3);
+      const next = cur.rows.filter(e=>!settled(e) && e.due && !dueState(e, month)).sort((a,b)=>a.due-b.due).slice(0,3);
       if(!late.length && !soon.length && next.length && month===thisMonth()) out.push({lvl:'info', t:'Prochaines échéances', x:next.map(e=>e.label+' '+dueLabel(e.due)).join(', ')+'.'});
     }
     // 0c. ceilings and unusual increases
@@ -1216,11 +1391,11 @@ body.is-busy .loadbar{opacity:1}
     }
 
     // 2. unpaid
-    const unpaid = cur.rows.filter(e=>!e.paid);
+    const unpaid = cur.rows.filter(e=>!settled(e));
     if(cur.rows.length && unpaid.length===0) out.push({lvl:'good', t:'Tout est payé', x:'Toutes les dépenses du mois sont réglées.'});
     else if(unpaid.length){
       const big = unpaid.slice().sort((a,b)=>b.amount-a.amount).slice(0,3).map(e=>e.label).join(', ');
-      out.push({lvl:'info', t:plural(unpaid.length,'dépense')+' à payer : '+fmt(cur.d-cur.paid)+' Ar', x:'Les plus importantes : '+big+'.'});
+      out.push({lvl:'info', t:plural(unpaid.length,'dépense')+' à payer : '+fmt(unpaid.reduce((s,e)=>s+leftOf(e),0))+' Ar', x:'Les plus importantes : '+big+'.'});
     }
 
     // 3. heavy line
@@ -1347,6 +1522,18 @@ body.is-busy .loadbar{opacity:1}
   $('capRows').addEventListener('change',ev=>{ const r=ev.target.closest('.cap-row'); if(!r||ev.target.tagName!=='INPUT') return; const v=parseAmt(ev.target.value); store.setCeiling(r.dataset.label, v).catch(fail); });
   $('capRows').addEventListener('keydown',ev=>{ if(ev.key==='Enter' && ev.target.tagName==='INPUT') ev.target.blur(); });
   $('capRows').addEventListener('click',ev=>{ const d=ev.target.closest('.del'); if(!d) return; const l=d.closest('.cap-row').dataset.label; store.setCeiling(l,0).then(()=>toast('Plafond de '+l+' supprimé')).catch(fail); });
+  $('lpForm').addEventListener('submit', ev=>{ ev.preventDefault(); const e=expenses.find(x=>x.id===panelId); if(!e) return; tryPayment(e, parseAmt($('lpAmt').value), $('lpDate').value); });
+  $('lpAmt').addEventListener('blur', ()=>{ const v=parseAmt($('lpAmt').value); $('lpAmt').value = v ? fmt(v) : ''; });
+  $('lpAll').addEventListener('click', ()=>{ const e=expenses.find(x=>x.id===panelId); if(e) tryPayment(e, leftOf(e), $('lpDate').value || todayISO(), {full:true}); });
+  $('lpClose').addEventListener('click', closeLine);
+  $('linePanel').addEventListener('click', ev=>{ if(ev.target===$('linePanel')) closeLine(); });
+  $('lpList').addEventListener('click', ev=>{
+    if(ev.target.closest('[data-unpay]')){ const id=panelId; store.update(id,{paid:false}).then(()=>{ const e=expenses.find(x=>x.id===id); if(e) openLine(e); toast('Paiement annulé'); }).catch(fail); return; }
+    const del=ev.target.closest('.del'); if(!del) return; const pid=del.closest('li').dataset.pid;
+    if(del.classList.contains('confirm')){ const id=panelId; store.removePayment(pid).then(()=>{ const e=expenses.find(x=>x.id===id); if(e) openLine(e); toast('Versement supprimé'); }).catch(fail); }
+    else { del.classList.add('confirm'); del.textContent='Suppr.?'; setTimeout(()=>{ if(del.isConnected){ del.classList.remove('confirm'); del.textContent='×'; } },3000); }
+  });
+  document.addEventListener('keydown', ev=>{ if(ev.key==='Escape' && !$('linePanel').hidden && $('dlg').hidden) closeLine(); });
   $('sortDue').addEventListener('click',()=>{ sortDue=!sortDue; try{ localStorage.setItem('budget-sort', sortDue?'due':'order'); }catch(e){} render(); });
   $('goal').addEventListener('change',()=>{ store && store.setGoal(parseAmt($('goal').value)).then(()=>toast('Objectif enregistré')).catch(fail); });
   $('goal').addEventListener('blur',()=>{ const v=parseAmt($('goal').value); $('goal').value = v?fmt(v):''; });
@@ -1376,7 +1563,7 @@ body.is-busy .loadbar{opacity:1}
       const d=parseAmt(ev.target.value); store.update(id,{due: d>=1 && d<=31 ? d : 0}).catch(fail);
     } else if(ev.target.classList.contains('amt')){
       const e=expenses.find(x=>x.id===id), v=parseAmt(ev.target.value);
-      if(e && e.paid){
+      if(e && e.paid && !paysOf(e.id).length){
         const M=money(month), avail=M.avail+(Number(e.amount)||0);
         if(M.b && v>avail && avail>=0){ ev.target.value=fmt(e.amount); return openDialog({ title:'Montant trop élevé pour '+e.label, text:'Cette dépense est déjà payée : avec '+fmt(v)+' Ar, les paiements dépasseraient le budget de '+fmt(v-avail)+' Ar.', figs:[['Budget',fmt(M.b)+' Ar'],['Maximum possible',fmt(avail)+' Ar','pos']], opts:[{label:'Mettre '+fmt(avail)+' Ar', detail:'Le maximum que le budget permet', cta:'Appliquer', primary:true, fn:()=>store.update(id,{amount:avail}).catch(fail)}] }); }
       }
@@ -1387,7 +1574,7 @@ body.is-busy .loadbar{opacity:1}
   $('rows').addEventListener('click',ev=>{
     const li=ev.target.closest('.row'); if(!li) return; const id=li.dataset.id;
     const chk=ev.target.closest('.chk');
-    if(chk){ const e=expenses.find(x=>x.id===id); if(!e) return; if(e.paid) store.update(id,{paid:false}).catch(fail); else tryPay(e); return; }
+    if(chk){ const e=expenses.find(x=>x.id===id); if(!e) return; openLine(e); return; }
     const star=ev.target.closest('.star');
     if(star){
       const e=expenses.find(x=>x.id===id); if(!e) return;
