@@ -80,6 +80,14 @@ button{cursor:pointer}
 .setup input{border:1px solid var(--line);background:var(--surface-2);border-radius:9px;padding:9px 11px;min-width:0;width:100%}
 .setup input:focus{border-color:var(--brand);outline:none;background:var(--surface)}
 .setup:not([hidden]) ~ .board{display:none}
+.setup{overflow-y:auto;max-height:100%}
+.keyrow{display:flex;gap:6px;align-items:stretch}
+.keyrow input{flex:1;font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.02em}
+.btn.icon{padding:0 10px}
+.btn.icon svg{width:16px;height:16px}
+.pwd{display:grid;gap:8px;margin-top:10px;padding-top:14px;border-top:1px solid var(--line)}
+.pwd-msg{font-size:.82rem;color:var(--muted);min-height:1.2em}
+.pwd-msg.err{color:var(--neg)} .pwd-msg.ok{color:var(--pos)}
 .sync-banner{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;border-radius:var(--r);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);background:var(--warn-soft)}
 .sync-banner > div{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 260px}
 .sync-banner b{font-weight:700;color:var(--ink)}
@@ -483,9 +491,26 @@ body.is-busy .loadbar{opacity:1}
         <b>Clé d'accès au classeur Budget Mahery</b>
         <span id="setupMsg">À faire une seule fois sur chaque appareil.</span>
       </div>
-      <label for="cfgKey">Clé d'accès (dans le classeur : menu Budget → Créer / afficher la clé d'accès)</label>
-      <input id="cfgKey" type="password" placeholder="Clé d'accès" required>
-      <div class="btns"><button class="btn" type="submit">Relier</button><button class="btn ghost" type="button" id="setupCancel">Annuler</button></div>
+      <label for="cfgKey">Clé d'accès ou mot de passe</label>
+      <div class="keyrow">
+        <input id="cfgKey" type="password" placeholder="Clé d'accès" required autocomplete="current-password">
+        <button class="btn ghost icon" type="button" id="keyEye" aria-label="Afficher la clé" title="Afficher la clé"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button class="btn ghost" type="button" id="keyCopy">Copier</button>
+      </div>
+      <div class="btns"><button class="btn" type="submit">Relier</button><button class="btn ghost" type="button" id="setupCancel">Fermer</button></div>
+
+      <div class="pwd" id="pwdBox" hidden>
+        <div class="setup-h">
+          <b>Remplacer la clé par un mot de passe</b>
+          <span>Choisissez un mot de passe facile à retenir (8 caractères minimum). Sur un nouvel appareil, vous le taperez au lieu d'ouvrir le classeur.</span>
+        </div>
+        <label for="pwdNew">Nouveau mot de passe</label>
+        <input id="pwdNew" type="password" minlength="8" autocomplete="new-password">
+        <label for="pwdNew2">Confirmer le mot de passe</label>
+        <input id="pwdNew2" type="password" minlength="8" autocomplete="new-password">
+        <span class="pwd-msg" id="pwdMsg" role="status"></span>
+        <div class="btns"><button class="btn" type="button" id="pwdSave">Enregistrer le mot de passe</button></div>
+      </div>
     </form>
     <main class="board">
       <!-- MOIS -->
@@ -640,7 +665,7 @@ body.is-busy .loadbar{opacity:1}
   function setStatus(text, kind){ const el=$('status'); el.textContent=text; el.classList.toggle('err', kind==='err'); el.classList.toggle('busy', kind==='busy'); }
   // Liaison avec le classeur : la page appelle le script Apps Script (application web) avec une clé d'accès.
   // ▼▼▼ COLLEZ ICI l'URL de votre déploiement Apps Script (elle se termine par /exec) ▼▼▼
-  const API_URL = 'https://script.google.com/macros/s/AKfycbzD2m7QyDICR4N7UaWm3nF8VQQ0NE91jzRNNnNIiiuZVpkl8kl7KJ9kRqL2C6SthQRYfQ/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzRcJOdus6ALXB99OJbsjhugO5mFJGEGIJr3V2A3prW5sQFT93J-jbsqzpNzgTZ7mlBxA/exec';
   // ▲▲▲ Ne mettez jamais la clé d'accès dans ce fichier : il est public sur GitHub. ▲▲▲
   const CFG_KEY = 'budget-api-key';
   const urlOk = () => /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API_URL);
@@ -1141,10 +1166,33 @@ body.is-busy .loadbar{opacity:1}
 
   /* ---------- Boot ---------- */
   function showSetup(msg){
-    const c = cfgGet(); $('cfgKey').value = c.key;
-    $('setupMsg').textContent = msg || 'À faire une seule fois sur chaque appareil.';
+    const c = cfgGet(); $('cfgKey').value = c.key; $('cfgKey').type = 'password';
+    $('setupMsg').textContent = msg || (c.key ? 'Votre clé est enregistrée sur cet appareil.' : 'À faire une seule fois sur chaque appareil.');
+    $('keyCopy').hidden = !c.key; $('pwdBox').hidden = !c.key || !!msg;
+    $('pwdNew').value = ''; $('pwdNew2').value = ''; pwdMsg('');
     $('setup').hidden = false; banner(null);
   }
+  function pwdMsg(t, kind){ const el=$('pwdMsg'); el.textContent=t; el.className='pwd-msg'+(kind?' '+kind:''); }
+  $('keyEye').addEventListener('click', () => {
+    const show = $('cfgKey').type === 'password'; $('cfgKey').type = show ? 'text' : 'password';
+    $('keyEye').setAttribute('aria-label', show ? 'Masquer la clé' : 'Afficher la clé');
+  });
+  $('keyCopy').addEventListener('click', () => {
+    const v = $('cfgKey').value;
+    const done = () => toast('Clé copiée');
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(done).catch(() => { $('cfgKey').type='text'; $('cfgKey').select(); toast('Sélectionnée : copiez-la avec Ctrl+C'); });
+    else { $('cfgKey').type='text'; $('cfgKey').select(); toast('Sélectionnée : copiez-la'); }
+  });
+  $('pwdSave').addEventListener('click', () => {
+    const a = $('pwdNew').value.trim(), b = $('pwdNew2').value.trim();
+    if(a.length < 8) return pwdMsg('Le mot de passe doit contenir au moins 8 caractères.', 'err');
+    if(a !== b) return pwdMsg('Les deux mots de passe ne sont pas identiques.', 'err');
+    $('pwdSave').disabled = true; pwdMsg('Enregistrement…');
+    call('changeKey', a).then(() => {
+      cfgSet(a); $('cfgKey').value = a; $('pwdNew').value = ''; $('pwdNew2').value = '';
+      pwdMsg('Mot de passe enregistré. L’ancienne clé ne fonctionne plus.', 'ok'); toast('Mot de passe enregistré');
+    }).catch(err => pwdMsg(errText(err), 'err')).finally(() => { $('pwdSave').disabled = false; });
+  });
   $('setup').addEventListener('submit', ev => {
     ev.preventDefault();
     cfgSet($('cfgKey').value.trim());
