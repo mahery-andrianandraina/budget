@@ -157,7 +157,7 @@ button{cursor:pointer}
 
 /* ---------- Mois ---------- */
 .p-mois.active{grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);grid-template-rows:auto minmax(0,1fr)}
-.thead,.row{display:grid;grid-template-columns:96px minmax(0,1fr) 128px 64px;align-items:center;gap:10px;padding:0 18px}
+.thead,.row{display:grid;grid-template-columns:96px minmax(0,1fr) 74px 128px 64px;align-items:center;gap:10px;padding:0 18px}
 .thead{padding-top:9px;padding-bottom:9px;border-bottom:1px solid var(--line);background:var(--surface-2);flex:none}
 .thead span{font-size:.7rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
 .thead span:nth-child(3){text-align:right}
@@ -243,7 +243,7 @@ form.add input.r{text-align:right;font-variant-numeric:tabular-nums}
 /* ---------- Essentielles ---------- */
 .p-ess.active{grid-template-columns:minmax(0,1fr) 300px;align-items:start;grid-template-rows:minmax(0,1fr)}
 .p-ess .card{height:100%}
-.ess .thead,.ess .row{grid-template-columns:minmax(0,1fr) 140px 40px}
+.ess .thead,.ess .row{grid-template-columns:minmax(0,1fr) 74px 140px 40px}
 .ess .row .del{opacity:0}
 .ess .row:hover .del,.ess .row:focus-within .del,.ess .del.confirm{opacity:1}
 .aside{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow)}
@@ -252,11 +252,11 @@ form.add input.r{text-align:right;font-variant-numeric:tabular-nums}
 
 /* ---------- Économies ---------- */
 .p-eco.active{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
-.eco-top{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.eco-top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .eco-top .aside .big.neg{color:var(--neg)}
 .eco-top .aside .big.pos{color:var(--pos)}
-#goal{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:6px 10px;font-family:var(--f-display);font-weight:600;font-size:1.1rem;min-width:0}
-#goal:focus{border-color:var(--brand);background:var(--surface)}
+#goal,#reserve{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:6px 10px;font-family:var(--f-display);font-weight:600;font-size:1.1rem;min-width:0}
+#goal:focus,#reserve:focus{border-color:var(--brand);background:var(--surface)}
 .sv-table{width:100%;border-collapse:collapse;font-size:.86rem;min-width:560px}
 .sv-table th{position:sticky;top:0;z-index:1;background:var(--surface-2);font-size:.7rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-align:right;padding:10px 18px;border-bottom:1px solid var(--line)}
 .sv-table th:first-child,.sv-table td:first-child{text-align:left}
@@ -309,7 +309,7 @@ form.add input.r{text-align:right;font-variant-numeric:tabular-nums}
   .p-ess .card{height:auto}
 }
 @media (max-width:520px){
-  .thead,.row{grid-template-columns:78px minmax(0,1fr) 96px 30px;padding:0 12px;gap:6px}
+  .thead,.row{grid-template-columns:76px minmax(0,1fr) 46px 86px 28px;padding:0 10px;gap:5px}
   .row .star{display:none}
   .row .del{opacity:1}
   .chk{padding:3px 8px 3px 7px;font-size:.68rem}
@@ -318,7 +318,7 @@ form.add input.r{text-align:right;font-variant-numeric:tabular-nums}
   .tools{width:100%;justify-content:space-between;flex-wrap:nowrap}
   #importEss span{display:none}
   #importEss{padding:9px 11px}
-  .ess .thead,.ess .row{grid-template-columns:minmax(0,1fr) 104px 34px}
+  .ess .thead,.ess .row{grid-template-columns:minmax(0,1fr) 46px 96px 30px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -430,6 +430,69 @@ body.is-busy .loadbar{opacity:1}
   .loadbar::before,.skel::after,.row.enter,.row.leaving,.row.saved,.row.saving::after,.pane.active,.status.busy::before{animation:none!important}
   .app.loading .kpi .v::after,.app.loading #budget::after{animation:none!important}
 }
+
+/* ===== Budget guard dialog ===== */
+.dlg-back{position:fixed;inset:0;z-index:40;background:rgba(10,15,30,.45);display:grid;place-items:center;
+  padding:max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));animation:fadeIn .18s ease-out}
+.dlg{width:min(520px,100%);max-height:100%;overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 60px rgba(10,15,30,.25);padding:20px;display:flex;flex-direction:column;gap:14px;animation:dlgIn .24s cubic-bezier(.2,.8,.2,1)}
+@keyframes fadeIn{from{opacity:0}} @keyframes dlgIn{from{opacity:0;transform:translateY(10px) scale(.98)}}
+.dlg-h{display:flex;flex-direction:column;gap:4px}
+.dlg-h b{font-family:var(--f-display);font-size:1.2rem;letter-spacing:-.01em}
+.dlg-tag{align-self:flex-start;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:99px;background:var(--neg-soft);color:var(--neg)}
+.dlg-tag.warn{background:var(--warn-soft);color:var(--warn)}
+.dlg-text{margin:0;color:var(--ink-2);font-size:.9rem}
+.dlg-figs{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px}
+.dlg-figs div{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.dlg-figs dt{font-size:.68rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.dlg-figs dd{margin:2px 0 0;font-family:var(--f-display);font-weight:600;font-size:1.05rem;font-variant-numeric:tabular-nums}
+.dlg-figs dd.neg{color:var(--neg)} .dlg-figs dd.pos{color:var(--pos)}
+.dlg-sub{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.dlg-sub:empty{display:none}
+.dlg-opts{display:flex;flex-direction:column;gap:8px}
+.dlg-opt{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:11px;padding:11px 13px;color:var(--ink)}
+.dlg-opt:hover{border-color:var(--brand);background:color-mix(in srgb,var(--brand-soft) 45%,var(--surface))}
+.dlg-opt b{font-weight:600;font-size:.9rem}
+.dlg-opt span{grid-column:1;font-size:.8rem;color:var(--muted)}
+.dlg-opt i{grid-row:1 / 3;grid-column:2;font-style:normal;font-size:.78rem;font-weight:700;color:var(--brand);white-space:nowrap}
+.dlg-opt.primary{border-color:transparent;background:var(--grad,var(--brand));color:#fff}
+.dlg-opt.primary span,.dlg-opt.primary i{color:rgba(255,255,255,.85)}
+.dlg-foot{display:flex;justify-content:flex-end}
+.chk.cant{background:var(--neg-soft);color:var(--neg)}
+.chk.cant::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.avail{font-weight:700;color:var(--pos)} .avail.neg{color:var(--neg)}
+@media (prefers-reduced-motion:reduce){.dlg,.dlg-back{animation:none}}
+
+/* ===== Due days, ceilings, protected savings ===== */
+.row input.due{text-align:center;font-variant-numeric:tabular-nums;color:var(--muted);margin:0;padding:6px 4px}
+.row input.due::placeholder{color:var(--line)}
+.row.due-late input.due{background:var(--neg-soft);color:var(--neg);font-weight:700;border-color:transparent}
+.row.due-soon input.due{background:var(--warn-soft);color:var(--warn);font-weight:700;border-color:transparent}
+.row.is-paid input.due{background:none;color:var(--muted);font-weight:400}
+.row.over-cap input.amt{color:var(--neg)}
+.thead .c{text-align:center}
+.sortbtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:3px 9px;font-size:.74rem;font-weight:600;color:var(--ink-2)}
+.sortbtn[aria-pressed="true"]{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.card-h .hwrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.p-ess.active{grid-template-columns:minmax(0,1fr) minmax(280px,360px);align-items:stretch}
+.caps{display:flex;flex-direction:column}
+.cap-row{display:grid;grid-template-columns:minmax(0,1fr) 110px 30px;gap:8px;align-items:center;padding:7px 16px;border-bottom:1px solid var(--line)}
+.cap-row b{font-weight:600;font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cap-row input{width:100%;min-width:0;border:1px solid transparent;background:none;border-radius:7px;padding:5px 7px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.cap-row input:hover{border-color:var(--line)} .cap-row input:focus{border-color:var(--brand);outline:none}
+.cap-row .use{grid-column:1 / -1;height:4px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:-2px}
+.cap-row .use i{display:block;height:100%;border-radius:99px;background:var(--pos);transition:width .5s}
+.cap-row .use i.warn{background:var(--warn)} .cap-row .use i.neg{background:var(--neg)}
+.cap-row small{grid-column:1 / -1;font-size:.72rem;color:var(--muted);margin-top:-4px}
+.cap-empty{padding:16px;color:var(--muted);font-size:.84rem}
+.reserve-note b{color:var(--ink)}
+.thead .sm{display:none}
+.thead span{white-space:nowrap}
+@media (max-width:860px){ .eco-top{grid-template-columns:1fr} .p-ess.active{grid-template-columns:1fr} }
+@media (max-width:520px){
+  .thead .lg{display:none} .thead .sm{display:inline}
+  .card-h{flex-wrap:wrap}
+  .card-h .hwrap{width:100%;justify-content:space-between}
+}
 </style>
 </head>
 <body>
@@ -540,8 +603,8 @@ body.is-busy .loadbar{opacity:1}
         </div>
 
         <section class="card" aria-label="Dépenses">
-          <div class="card-h"><h2>Dépenses</h2><span class="hint" id="rowCount"></span></div>
-          <div class="thead"><span>Statut</span><span>Dépense</span><span>Montant (Ar)</span><span></span></div>
+          <div class="card-h"><h2>Dépenses</h2><div class="hwrap"><span class="hint" id="rowCount"></span><button type="button" class="sortbtn" id="sortDue" aria-pressed="false">Trier par échéance</button></div></div>
+          <div class="thead"><span>Statut</span><span>Dépense</span><span class="c" title="Jour du mois où la dépense doit être payée"><span class="lg">Échéance</span><span class="sm">Jour</span></span><span>Montant (Ar)</span><span></span></div>
           <div class="scroll">
             <ul class="rows" id="rows"></ul>
             <div class="empty" id="empty" hidden>
@@ -588,7 +651,7 @@ body.is-busy .loadbar{opacity:1}
       <div class="pane p-ess" data-pane="ess">
         <section class="card ess" aria-label="Dépenses essentielles">
           <div class="card-h"><h2>Dépenses essentielles</h2><span class="hint">modifiables directement</span></div>
-          <div class="thead"><span>Dépense</span><span style="text-align:right">Montant (Ar)</span><span></span></div>
+          <div class="thead"><span>Dépense</span><span class="c"><span class="lg">Échéance</span><span class="sm">Jour</span></span><span style="text-align:right">Montant (Ar)</span><span></span></div>
           <div class="scroll">
             <ul class="rows" id="essRows"></ul>
             <div class="empty" id="essEmpty" hidden>
@@ -603,11 +666,16 @@ body.is-busy .loadbar{opacity:1}
             <button class="btn" type="submit">Créer</button>
           </form>
         </section>
-        <div class="aside">
-          <span class="cap">À quoi ça sert</span>
-          <p>Les dépenses essentielles reviennent chaque mois : loyer, électricité, riz… Le bouton « Importer les essentielles » les ajoute au mois affiché, sans doublon.</p>
-          <p>Sur une ligne du mois, l'étoile ajoute ou retire une dépense de cette liste.</p>
-        </div>
+        <section class="card caps" aria-label="Plafonds">
+          <div class="card-h"><h2>Plafonds par dépense</h2><span class="hint">maximum par mois</span></div>
+          <div class="scroll" id="capRows"></div>
+          <form class="add" id="capForm" autocomplete="off">
+            <input id="capLabel" placeholder="Dépense" aria-label="Dépense à plafonner" required list="capList">
+            <input id="capAmt" class="r" inputmode="numeric" placeholder="Plafond" aria-label="Plafond mensuel" required>
+            <button class="btn" type="submit">Fixer</button>
+          </form>
+          <datalist id="capList"></datalist>
+        </section>
       </div>
 
       <!-- ÉCONOMIES -->
@@ -624,6 +692,11 @@ body.is-busy .loadbar{opacity:1}
             <div class="meter"><i class="paid" id="goalBar" style="background:var(--pos)"></i></div>
             <p id="goalNote">Fixez un objectif pour suivre votre progression.</p>
           </div>
+          <div class="aside">
+            <label for="reserve" class="cap">Épargne protégée chaque mois (Ar)</label>
+            <input id="reserve" class="num" inputmode="numeric" autocomplete="off" placeholder="ex. 50 000">
+            <p class="reserve-note" id="reserveNote">Ce montant est mis de côté : l'application refuse tout paiement qui l'entamerait.</p>
+          </div>
         </div>
         <section class="card" aria-label="Historique">
           <div class="card-h"><h2>Mois par mois</h2><span class="hint">Cliquez sur un mois pour l'ouvrir</span></div>
@@ -639,6 +712,16 @@ body.is-busy .loadbar{opacity:1}
     </main>
   </section>
 </div>
+<div class="dlg-back" id="dlg" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+    <div class="dlg-h"><span class="dlg-tag" id="dlgTag"></span><b id="dlgTitle"></b></div>
+    <p class="dlg-text" id="dlgText"></p>
+    <dl class="dlg-figs" id="dlgFigs"></dl>
+    <div class="dlg-sub" id="dlgSubT"></div>
+    <div class="dlg-opts" id="dlgOpts"></div>
+    <div class="dlg-foot"><button class="btn ghost" type="button" id="dlgClose">Annuler</button></div>
+  </div>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -652,7 +735,10 @@ body.is-busy .loadbar{opacity:1}
   let budgets = {};      // month -> number
   let expenses = [];     // {id, month, label, amount, paid, createdAt}
   let goal = 0;          // savings goal
-  let essentials = [];   // {id, label, amount, createdAt} — user's recurring monthly expenses
+  let essentials = [];
+  let ceilings = {};     // DÉSIGNATION -> plafond mensuel (Ar)
+  let reserve = 0;       // épargne protégée chaque mois (Ar)
+  let sortDue = false; try{ sortDue = localStorage.getItem('budget-sort')==='due'; }catch(e){}   // {id, label, amount, createdAt} — user's recurring monthly expenses
   let store = null;      // backend
   let curTab = 'mois';
 
@@ -665,7 +751,7 @@ body.is-busy .loadbar{opacity:1}
   function setStatus(text, kind){ const el=$('status'); el.textContent=text; el.classList.toggle('err', kind==='err'); el.classList.toggle('busy', kind==='busy'); }
   // Liaison avec le classeur : la page appelle le script Apps Script (application web) avec une clé d'accès.
   // ▼▼▼ COLLEZ ICI l'URL de votre déploiement Apps Script (elle se termine par /exec) ▼▼▼
-  const API_URL = 'https://script.google.com/macros/s/AKfycbzRcJOdus6ALXB99OJbsjhugO5mFJGEGIJr3V2A3prW5sQFT93J-jbsqzpNzgTZ7mlBxA/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbz0K2F8zfheUq6jA_-r0j8domvsqtJiV7QnT8VQm9N_5DMt_B7InIx7dRU4nsvZYBMjkA/exec';
   // ▲▲▲ Ne mettez jamais la clé d'accès dans ce fichier : il est public sur GitHub. ▲▲▲
   const CFG_KEY = 'budget-api-key';
   const urlOk = () => /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API_URL);
@@ -690,6 +776,7 @@ body.is-busy .loadbar{opacity:1}
   function apply(d){
     if(!d) return;
     expenses = d.expenses || []; budgets = d.budgets || {}; essentials = d.essentials || []; goal = Number(d.goal) || 0;
+    ceilings = d.ceilings || {}; reserve = Number(d.reserve) || 0;
     if(d.url){ $('sheetUrl').href = d.url; }
     render();
   }
@@ -731,6 +818,8 @@ body.is-busy .loadbar{opacity:1}
       remove(id){ return mut(() => { expenses = expenses.filter(x => x.id!==id); }, 'deleteExpense', [id]); },
       setBudget(m, v){ return mut(() => { budgets = {...budgets, [m]:v}; }, 'setBudget', [m, v]); },
       setGoal(v){ return mut(() => { goal = v; }, 'setGoal', [v]); },
+      setReserve(v){ return mut(() => { reserve = v; }, 'setReserve', [v]); },
+      setCeiling(label, v){ return mut(() => { const c={...ceilings}; if(v>0) c[label]=v; else delete c[label]; ceilings=c; }, 'setCeiling', [label, v]); },
       addEss(e){ const it = {...e, id:nid('s')}; return mut(() => { essentials = essentials.concat([it]); }, 'addEssential', [it], it.id); },
       updateEss(id, p){ return mut(() => { essentials = essentials.map(x => x.id===id ? {...x, ...p} : x); }, 'updateEssential', [id, p], id); },
       removeEss(id){ return mut(() => { essentials = essentials.filter(x => x.id!==id); }, 'deleteEssential', [id]); }
@@ -753,6 +842,7 @@ body.is-busy .loadbar{opacity:1}
     const total = rows.reduce((s,e)=>s+(Number(e.amount)||0),0);
     const paid = rows.filter(e=>e.paid).reduce((s,e)=>s+(Number(e.amount)||0),0);
     const reste = budget - total;
+    const availNow = budget - reserve - paid;
 
     if(document.activeElement !== $('budget')) $('budget').value = budget ? fmt(budget) : '';
     tween($('total'), total);
@@ -773,7 +863,7 @@ body.is-busy .loadbar{opacity:1}
     { const n=new Date(), cm=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
       if(cm===month){ const last=new Date(n.getFullYear(), n.getMonth()+1, 0).getDate(), left=last-n.getDate(); $('sideDays').textContent = left ? plural(left,'jour')+' avant la fin du mois' : 'Dernier jour du mois'; }
       else $('sideDays').textContent = month<cm ? 'Mois terminé' : 'Mois à venir'; }
-    $('rowCount').textContent = rows.length ? plural(rows.length,'ligne')+' · '+rows.filter(e=>e.paid).length+' payée'+(rows.filter(e=>e.paid).length>1?'s':'') : '';
+    $('rowCount').innerHTML = rows.length ? plural(rows.length,'ligne')+' · '+rows.filter(e=>e.paid).length+' payée'+(rows.filter(e=>e.paid).length>1?'s':'')+(budget ? ' · disponible <span class="avail'+(availNow<=0?' neg':'')+'">'+fmt(Math.max(0,availNow))+' Ar</span>' : '') : '';
     tween($('footTotal'), total, ' Ar');
     $('paidSum').textContent = fmt(paid) + ' Ar';
     $('unpaidSum').textContent = fmt(total-paid) + ' Ar';
@@ -786,22 +876,27 @@ body.is-busy .loadbar{opacity:1}
     // rows — keep focus on the field being edited
     const focused = document.activeElement && document.activeElement.closest('.row') ? document.activeElement.dataset.key : null;
     const ul = $('rows'); ul.innerHTML='';
+    if(sortDue) rows.sort((a,b)=>(a.paid-b.paid) || ((a.due||99)-(b.due||99)) || ((a.createdAt||0)-(b.createdAt||0)));
+    $('sortDue').setAttribute('aria-pressed', String(sortDue));
     rows.forEach(e=>{
-      const li = document.createElement('li'); li.className='row has-star'+(e.paid?' is-paid':'')+(prevIds && !prevIds.has(e.id) ? ' enter' : '')+(pendingIds.has(e.id)?' saving':'')+(savedIds.has(e.id)?' saved':''); li.dataset.id=e.id;
+      const ds = dueState(e, month), capV = ceilings[norm(e.label)], overCap = capV && capUse(e.label, month) > capV;
+      const li = document.createElement('li'); li.className='row has-star'+(ds?' due-'+ds:'')+(overCap?' over-cap':'')+(e.paid?' is-paid':'')+(prevIds && !prevIds.has(e.id) ? ' enter' : '')+(pendingIds.has(e.id)?' saving':'')+(savedIds.has(e.id)?' saved':''); li.dataset.id=e.id;
       const isEss = !!findEss(e.label);
       li.innerHTML =
-        '<button type="button" class="chk" aria-pressed="'+(!!e.paid)+'" aria-label="Payé">'+(e.paid?'Payé':'À payer')+'</button>'+
+        '<button type="button" class="chk'+(!e.paid && budget && (Number(e.amount)||0) > availNow ? ' cant' : '')+'" aria-pressed="'+(!!e.paid)+'" aria-label="Payé" title="'+(!e.paid && budget && (Number(e.amount)||0) > availNow ? 'Budget insuffisant pour payer cette ligne' : '')+'">'+(e.paid?'Payé':(!e.paid && budget && (Number(e.amount)||0) > availNow ? 'Insuffisant' : 'À payer'))+'</button>'+
         '<input type="text" class="lab" id="lab-'+e.id+'" data-key="lab-'+e.id+'" aria-label="Dépense">'+
-        '<input type="text" class="amt" id="amt-'+e.id+'" data-key="amt-'+e.id+'" inputmode="numeric" aria-label="Montant">'+
+        '<input type="text" class="due" id="due-'+e.id+'" data-key="due-'+e.id+'" inputmode="numeric" maxlength="2" placeholder="—" aria-label="Jour d\u2019échéance" title="'+(ds==='late'?'En retard':ds==='soon'?'À payer bientôt':'Jour du mois')+'">'+
+        '<input type="text" class="amt" id="amt-'+e.id+'" data-key="amt-'+e.id+'" inputmode="numeric" aria-label="Montant"'+(overCap?' title="Plafond de '+fmt(capV)+' Ar dépassé"':'')+'>'+
         '<span class="acts"><button type="button" class="star" aria-pressed="'+isEss+'" title="'+(isEss?'Retirer des essentielles':'Ajouter aux essentielles')+'" aria-label="Dépense essentielle">'+(isEss?'★':'☆')+'</button>'+
         '<button type="button" class="del" aria-label="Supprimer">×</button></span>';
       li.querySelector('.lab').value = e.label || '';
       li.querySelector('.amt').value = fmt(e.amount);
+      li.querySelector('.due').value = e.due ? e.due : '';
       ul.appendChild(li);
     });
     if(focused){ const el=document.querySelector('[data-key="'+focused+'"]'); if(el) el.focus(); }
     prevIds = loaded ? new Set(expenses.map(x=>x.id)) : null; savedIds.clear();
-    if(!loaded){ ul.innerHTML = Array.from({length:6}, () => '<li class="row has-star skel-row"><span class="skel s1"></span><span class="skel s2"></span><span class="skel s3"></span><span></span><span></span></li>').join(''); }
+    if(!loaded){ ul.innerHTML = Array.from({length:6}, () => '<li class="row has-star skel-row"><span class="skel s1"></span><span class="skel s2"></span><span></span><span class="skel s3"></span><span></span></li>').join(''); }
     $('empty').hidden = !loaded || rows.length>0;
     $('copyPrev').hidden = monthRows(shiftMonth(month,-1)).length===0;
 
@@ -823,6 +918,9 @@ body.is-busy .loadbar{opacity:1}
     drawRing(sorted, budget, total, col);
 
     renderSavings();
+    renderCaps();
+    if(document.activeElement !== $('reserve')) $('reserve').value = reserve ? fmt(reserve) : '';
+    $('reserveNote').innerHTML = reserve>0 && budget ? 'Ce mois-ci : <b>'+fmt(Math.max(0,budget-reserve))+' Ar</b> à dépenser sur '+fmt(budget)+' Ar. Tout paiement qui entamerait les '+fmt(reserve)+' Ar est refusé.' : 'Ce montant est mis de côté : l\u2019application refuse tout paiement qui l\u2019entamerait.';
     renderInsights();
 
     // essentials list
@@ -832,9 +930,10 @@ body.is-busy .loadbar{opacity:1}
     essSorted.forEach(e=>{
       const li=document.createElement('li'); li.className='row'+(pendingIds.has(e.id)?' saving':''); li.dataset.id=e.id;
       li.innerHTML='<input type="text" class="lab" id="elab-'+e.id+'" data-key="elab-'+e.id+'" aria-label="Dépense essentielle">'+
+        '<input type="text" class="due" id="edue-'+e.id+'" data-key="edue-'+e.id+'" inputmode="numeric" maxlength="2" placeholder="—" aria-label="Jour d\u2019échéance">'+
         '<input type="text" class="amt" id="eamt-'+e.id+'" data-key="eamt-'+e.id+'" inputmode="numeric" aria-label="Montant habituel">'+
         '<button type="button" class="del" aria-label="Supprimer">×</button>';
-      li.querySelector('.lab').value=e.label||''; li.querySelector('.amt').value=fmt(e.amount);
+      li.querySelector('.lab').value=e.label||''; li.querySelector('.amt').value=fmt(e.amount); li.querySelector('.due').value=e.due?e.due:'';
       eul.appendChild(li);
     });
     if(eFocused){ const el=document.querySelector('[data-key="'+eFocused+'"]'); if(el) el.focus(); }
@@ -877,6 +976,149 @@ body.is-busy .loadbar{opacity:1}
     svg.innerHTML=html;
   }
 
+  /* ---------- Ceilings panel ---------- */
+  function renderCaps(){
+    const box=$('capRows'); if(!box) return;
+    const focusedKey = document.activeElement && document.activeElement.closest('#capRows') ? document.activeElement.dataset.key : null;
+    const labels = Object.keys(ceilings).sort();
+    box.innerHTML = labels.length ? '' : '<div class="cap-empty">Aucun plafond. Fixez un maximum mensuel pour une dépense qui varie, comme VARY ou LOKA : l’application vous prévient avant de le dépasser.</div>';
+    labels.forEach(l=>{
+      const cap=ceilings[l], used=capUse(l, month), pct=cap?used/cap*100:0;
+      const row=document.createElement('div'); row.className='cap-row'; row.dataset.label=l;
+      row.innerHTML='<b></b><input inputmode="numeric" aria-label="Plafond"><button type="button" class="del" aria-label="Supprimer le plafond">×</button><div class="use"><i></i></div><small></small>';
+      row.querySelector('b').textContent=l;
+      const inp=row.querySelector('input'); inp.value=fmt(cap); inp.dataset.key='cap-'+l;
+      const bar=row.querySelector('.use i'); bar.style.width=Math.min(100,pct)+'%'; bar.className = pct>100?'neg':pct>=90?'warn':'';
+      row.querySelector('small').textContent = fmt(used)+' Ar prévus ce mois-ci sur '+fmt(cap)+' Ar'+(used>cap?' · dépassé de '+fmt(used-cap)+' Ar':'');
+      box.appendChild(row);
+    });
+    if(focusedKey){ const el=box.querySelector('[data-key="'+focusedKey+'"]'); if(el) el.focus(); }
+    const dl=$('capList'); const opts=new Set(expenses.map(e=>norm(e.label)).concat(essentials.map(e=>norm(e.label))));
+    dl.innerHTML=''; [...opts].sort().forEach(v=>{ const o=document.createElement('option'); o.value=v; dl.appendChild(o); });
+  }
+
+  /* ---------- Due days ---------- */
+  const thisMonth = () => { const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0'); };
+  // 'late' | 'soon' | '' for an unpaid line of month m
+  function dueState(e, m){
+    const d = Number(e.due)||0; if(!d || e.paid) return '';
+    const cm = thisMonth();
+    if(m < cm) return 'late';
+    if(m > cm) return '';
+    const today = new Date().getDate();
+    if(d < today) return 'late';
+    if(d - today <= 3) return 'soon';
+    return '';
+  }
+  const dueLabel = d => d ? 'le '+d : '';
+  // Ceiling use for one label in month m
+  function capUse(label, m){ const k=norm(label); return monthRows(m).filter(e=>norm(e.label)===k).reduce((s,e)=>s+(Number(e.amount)||0),0); }
+
+  /* ---------- Budget guard: you cannot pay more than the month's budget ---------- */
+  function money(m){
+    const rows = monthRows(m), b = budgets[m] || 0;
+    const paid = rows.filter(e=>e.paid).reduce((s,e)=>s+(Number(e.amount)||0),0);
+    const planned = rows.reduce((s,e)=>s+(Number(e.amount)||0),0);
+    return { rows, b, paid, planned, spendable: Math.max(0, b - reserve), avail: b - reserve - paid };
+  }
+  const isEss = e => !!findEss(e.label);
+  // Unpaid lines that could be postponed, non-essential and largest first
+  function postponable(rows, exceptId){
+    return rows.filter(e=>!e.paid && e.id!==exceptId).sort((a,b)=>(isEss(a)-isEss(b)) || ((b.amount||0)-(a.amount||0)));
+  }
+  // Smallest set of lines (non-essential first) that covers `need`
+  function coverWith(list, need){
+    const picked=[]; let sum=0;
+    for(const e of list){ if(sum>=need) break; picked.push(e); sum+=Number(e.amount)||0; }
+    return sum>=need ? {picked,sum} : null;
+  }
+  function openDialog(o){
+    $('dlgTag').textContent = o.tag || 'Budget insuffisant'; $('dlgTag').className = 'dlg-tag' + (o.warn ? ' warn' : '');
+    $('dlgTitle').textContent = o.title; $('dlgText').textContent = o.text || '';
+    $('dlgFigs').innerHTML = ''; (o.figs||[]).forEach(f=>{ const d=document.createElement('div'); d.innerHTML='<dt></dt><dd></dd>'; d.firstChild.textContent=f[0]; d.lastChild.textContent=f[1]; if(f[2]) d.lastChild.className=f[2]; $('dlgFigs').appendChild(d); });
+    $('dlgSubT').textContent = (o.opts && o.opts.length) ? (o.optsTitle || 'Solutions proposées') : '';
+    const box=$('dlgOpts'); box.innerHTML='';
+    (o.opts||[]).forEach(op=>{ const b=document.createElement('button'); b.type='button'; b.className='dlg-opt'+(op.primary?' primary':''); b.innerHTML='<b></b><span></span><i></i>'; b.children[0].textContent=op.label; b.children[1].textContent=op.detail||''; b.children[2].textContent=op.cta||'Choisir'; b.addEventListener('click',()=>{ closeDialog(); op.fn(); }); box.appendChild(b); });
+    $('dlgClose').textContent = o.closeLabel || 'Annuler';
+    $('dlg').hidden=false; setTimeout(()=>{ const f=box.querySelector('button')||$('dlgClose'); f.focus(); },30);
+  }
+  function closeDialog(){ $('dlg').hidden=true; }
+  $('dlgClose').addEventListener('click', closeDialog);
+  $('dlg').addEventListener('click', ev=>{ if(ev.target===$('dlg')) closeDialog(); });
+  document.addEventListener('keydown', ev=>{ if(ev.key==='Escape' && !$('dlg').hidden) closeDialog(); });
+
+  const postponeOpt = (e, why) => ({ label:'Reporter '+e.label+' au mois prochain', detail:fmt(e.amount)+' Ar'+(isEss(e)?' · dépense essentielle':'')+(why?' · '+why:''), cta:'Reporter',
+    fn:()=>store.update(e.id,{month:shiftMonth(month,1), paid:false}).then(()=>toast(e.label+' reporté à '+monthName(shiftMonth(month,1)))).catch(fail) });
+
+  // Called when the user ticks "Payé"
+  function tryPay(e){
+    const M = money(month), amt = Number(e.amount)||0;
+    if(!M.b){
+      return openDialog({ tag:'Budget manquant', warn:true, title:'Saisissez d’abord le budget du mois',
+        text:'Sans budget, l’application ne peut pas vérifier que vous avez de quoi payer '+e.label+'.',
+        opts:[{label:'Saisir le budget', detail:'Le champ Budget du mois s’ouvre', cta:'Saisir', primary:true, fn:()=>{ showTab('mois'); $('budget').focus(); }}] });
+    }
+    if(amt > M.avail){
+      const need = amt - M.avail, opts = [];
+      if(M.avail > 0) opts.push({ label:'Payer '+fmt(M.avail)+' Ar maintenant', detail:'Le reste ('+fmt(need)+' Ar) devient une nouvelle ligne à payer', cta:'Payer en partie', primary:true,
+        fn:()=>{ store.update(e.id,{amount:M.avail, paid:true}).then(()=>store.add({month, label:e.label+' (RESTE)', amount:need, paid:false, createdAt:(e.createdAt||Date.now())+0.5, due:Number(e.due)||0})).then(()=>toast('Paiement partiel enregistré')).catch(fail); } });
+      opts.push(postponeOpt(e));
+      opts.push({ label:'Augmenter le budget à '+fmt(M.paid+amt+reserve)+' Ar', detail:'+'+fmt(need)+' Ar sur le budget de '+monthName(month), cta:'Augmenter',
+        fn:()=>store.setBudget(month, M.paid+amt+reserve).then(()=>store.update(e.id,{paid:true})).then(()=>toast('Budget augmenté et '+e.label+' payé')).catch(fail) });
+      if(reserve > 0) opts.push({ label:'Prendre '+fmt(Math.min(need,reserve))+' Ar sur l\u2019épargne protégée', detail: need<=reserve ? 'L\u2019épargne protégée passe à '+fmt(reserve-need)+' Ar ce mois-ci' : 'Ne suffit pas seul : il manquerait encore '+fmt(need-reserve)+' Ar', cta:'Utiliser',
+        fn:()=>{ if(need>reserve) return toast('L\u2019épargne protégée ne suffit pas'); store.setReserve(reserve-need).then(()=>store.update(e.id,{paid:true})).then(()=>toast(e.label+' payé avec l\u2019épargne protégée')).catch(fail); } });
+      const figs=[['Budget',fmt(M.b)+' Ar'],['Déjà payé',fmt(M.paid)+' Ar']];
+      if(reserve>0) figs.push(['Épargne protégée',fmt(reserve)+' Ar']);
+      figs.push(['Disponible',fmt(Math.max(0,M.avail))+' Ar',M.avail>0?'pos':'neg'],['Il manque',fmt(need)+' Ar','neg']);
+      return openDialog({ title:'Impossible de payer '+e.label,
+        text: M.avail>0 ? 'Il ne reste que '+fmt(M.avail)+' Ar à dépenser ce mois-ci'+(reserve>0?', épargne protégée mise à part.':'.') : (reserve>0 ? 'Le budget est utilisé jusqu\u2019à l\u2019épargne protégée.' : 'Le budget du mois est entièrement utilisé.'),
+        figs, opts });
+    }
+    // Enough money, but paying a non-essential would leave essentials unpaid
+    if(!isEss(e)){
+      const essLeft = M.rows.filter(x=>!x.paid && x.id!==e.id && isEss(x));
+      const essSum = essLeft.reduce((s,x)=>s+(Number(x.amount)||0),0);
+      if(essLeft.length && M.avail - amt < essSum){
+        return openDialog({ tag:'Attention', warn:true, title:'Vos essentielles risquent de manquer',
+          text:'Après '+e.label+', il resterait '+fmt(M.avail-amt)+' Ar, alors que '+essLeft.map(x=>x.label).join(', ')+(essLeft.length>1?' coûtent':' coûte')+' encore '+fmt(essSum)+' Ar.',
+          figs:[['Disponible',fmt(M.avail)+' Ar'],['Après paiement',fmt(M.avail-amt)+' Ar'],['Essentielles à payer',fmt(essSum)+' Ar','neg']],
+          optsTitle:'Que voulez-vous faire ?',
+          opts:[ postponeOpt(e,'garde l’argent pour les essentielles'),
+                 { label:'Payer '+e.label+' quand même', detail:'Les essentielles restantes devront attendre', cta:'Payer', fn:()=>store.update(e.id,{paid:true}).catch(fail) } ] });
+      }
+    }
+    store.update(e.id,{paid:true}).catch(fail);
+  }
+
+  // Called before adding a new line
+  function tryAdd(item, done, skipCap){
+    const cap = ceilings[norm(item.label)];
+    if(cap && !skipCap){
+      const used = capUse(item.label, item.month||month), after = used + item.amount;
+      if(after > cap){
+        const room = Math.max(0, cap - used), opts=[];
+        if(room>0) opts.push({ label:'Ajouter '+fmt(room)+' Ar seulement', detail:'Le maximum restant sous le plafond de '+item.label, cta:'Limiter', primary:true, fn:()=>tryAdd({...item, amount:room}, done, true) });
+        opts.push({ label:'Ajouter '+fmt(item.amount)+' Ar quand même', detail:'Le plafond sera dépassé de '+fmt(after-cap)+' Ar', cta:'Ajouter', fn:()=>tryAdd(item, done, true) });
+        opts.push({ label:'Relever le plafond à '+fmt(after)+' Ar', detail:'Puis ajouter la dépense', cta:'Relever', fn:()=>store.setCeiling(norm(item.label), after).then(()=>tryAdd(item, done, true)).catch(fail) });
+        return openDialog({ tag:'Plafond', warn:true, title:item.label+' dépasserait son plafond',
+          text:'Ce mois-ci, '+item.label+' compte déjà '+fmt(used)+' Ar pour un plafond de '+fmt(cap)+' Ar.',
+          figs:[['Plafond',fmt(cap)+' Ar'],['Déjà prévu',fmt(used)+' Ar'],['Après ajout',fmt(after)+' Ar','neg']], opts });
+      }
+    }
+    const M = money(month), after = M.planned + item.amount;
+    if(!M.b || after <= M.spendable){ store.add(item).then(()=>toast(item.label+' ajouté')).catch(fail); return done(); }
+    const over = after - M.spendable, cover = coverWith(postponable(M.rows), over), opts=[];
+    if(cover) opts.push({ label:'Reporter '+cover.picked.map(x=>x.label).join(', ')+' au mois prochain', detail:'Libère '+fmt(cover.sum)+' Ar : '+item.label+' tient alors dans le budget', cta:'Reporter et ajouter', primary:true,
+      fn:()=>{ Promise.all(cover.picked.map(x=>store.update(x.id,{month:shiftMonth(month,1), paid:false}))).then(()=>store.add(item)).then(()=>toast(item.label+' ajouté, '+cover.picked.length+' ligne'+(cover.picked.length>1?'s':'')+' reportée'+(cover.picked.length>1?'s':''))).catch(fail); done(); } });
+    opts.push({ label:'Ajouter '+item.label+' au mois prochain', detail:'Elle sera prévue pour '+monthName(shiftMonth(month,1)), cta:'Ajouter plus tard',
+      fn:()=>{ store.add({...item, month:shiftMonth(month,1)}).then(()=>toast(item.label+' ajouté à '+monthName(shiftMonth(month,1)))).catch(fail); done(); } });
+    opts.push({ label:'Ajouter quand même', detail:'Le mois dépassera le budget de '+fmt(over)+' Ar ; vous ne pourrez pas tout payer', cta:'Ajouter',
+      fn:()=>{ store.add(item).then(()=>toast(item.label+' ajouté (budget dépassé)')).catch(fail); done(); } });
+    openDialog({ tag:'Dépassement', warn:true, title:item.label+' ferait dépasser le budget',
+      text:'Avec cette dépense, le mois prévoit '+fmt(after)+' Ar pour '+fmt(M.spendable)+' Ar à dépenser'+(reserve>0?' (budget moins l\u2019épargne protégée).':'.'),
+      figs:[[reserve>0?'À dépenser':'Budget',fmt(M.spendable)+' Ar'],['Déjà prévu',fmt(M.planned)+' Ar'],['Dépassement',fmt(over)+' Ar','neg']], opts });
+  }
+
   /* ---------- Essentials helpers ---------- */
   const norm = s => String(s||'').trim().toUpperCase();
   function findEss(label){ const k=norm(label); return essentials.find(e=>norm(e.label)===k); }
@@ -887,7 +1129,7 @@ body.is-busy .loadbar{opacity:1}
     if(!miss.length){ toast('Toutes les essentielles sont déjà dans ce mois'); return; }
     try{
       let t=Date.now();
-      await Promise.all(miss.map(e=>store.add({month,label:norm(e.label),amount:Number(e.amount)||0,paid:false,createdAt:t++})));
+      await Promise.all(miss.map(e=>store.add({month,label:norm(e.label),amount:Number(e.amount)||0,paid:false,createdAt:t++,due:Number(e.due)||0})));
       toast(miss.length+' dépense'+(miss.length>1?'s':'')+' essentielle'+(miss.length>1?'s':'')+' importée'+(miss.length>1?'s':''));
     }catch(e){ fail(e); }
   }
@@ -921,6 +1163,49 @@ body.is-busy .loadbar{opacity:1}
       }
       return out;
     }
+
+    // 0. lines that can no longer be paid
+    if(cur.b){
+      const avail = cur.b - reserve - cur.paid;
+      const cant = cur.rows.filter(e=>!e.paid && (Number(e.amount)||0) > avail);
+      const unpaidTot = cur.rows.filter(e=>!e.paid).reduce((s,e)=>s+(Number(e.amount)||0),0);
+      if(cant.length) out.push({lvl:'alert', t:plural(cant.length,'dépense')+' ne peu'+(cant.length>1?'vent':'t')+' plus être payée'+(cant.length>1?'s':''), x:cant.map(e=>e.label).join(', ')+'. Il reste '+fmt(Math.max(0,avail))+' Ar disponibles : reportez une ligne, payez en partie ou augmentez le budget.'});
+      else if(unpaidTot > avail){
+        const need = unpaidTot - avail, c = coverWith(postponable(cur.rows), need);
+        out.push({lvl:'warn', t:'Le budget ne couvre pas tout ce qui reste à payer', x:'Il manque '+fmt(need)+' Ar.'+(c ? ' Reporter '+c.picked.map(e=>e.label).join(', ')+' au mois prochain suffirait.' : ''), act: c ? 'postpone:'+c.picked.map(e=>e.id).join(',') : null, actLbl:'Reporter'});
+      }
+      const essUnpaid = cur.rows.filter(e=>!e.paid && isEss(e));
+      const essSum = essUnpaid.reduce((s,e)=>s+(Number(e.amount)||0),0);
+      if(essUnpaid.length && essSum > avail) out.push({lvl:'alert', t:'Pas assez pour les essentielles', x:'Il faut encore '+fmt(essSum)+' Ar pour '+essUnpaid.map(e=>e.label).join(', ')+', mais seulement '+fmt(Math.max(0,avail))+' Ar sont disponibles.'});
+      else if(essUnpaid.length) out.push({lvl:'info', t:'Payez d’abord les essentielles', x:essUnpaid.map(e=>e.label).join(', ')+' ('+fmt(essSum)+' Ar) : elles passent avant les autres dépenses.'});
+    }
+
+    // 0b. due days: late and upcoming
+    {
+      const late = cur.rows.filter(e=>dueState(e, month)==='late').sort((a,b)=>(a.due||0)-(b.due||0));
+      const soon = cur.rows.filter(e=>dueState(e, month)==='soon').sort((a,b)=>(a.due||0)-(b.due||0));
+      if(late.length) out.push({lvl:'alert', t:plural(late.length,'dépense')+' en retard', x:late.map(e=>e.label+' (échéance '+dueLabel(e.due)+', '+fmt(e.amount)+' Ar)').join(', ')+'.'});
+      if(soon.length) out.push({lvl:'warn', t:'À payer dans les 3 prochains jours', x:soon.map(e=>e.label+' '+dueLabel(e.due)+' ('+fmt(e.amount)+' Ar)').join(', ')+'.'});
+      const next = cur.rows.filter(e=>!e.paid && e.due && !dueState(e, month)).sort((a,b)=>a.due-b.due).slice(0,3);
+      if(!late.length && !soon.length && next.length && month===thisMonth()) out.push({lvl:'info', t:'Prochaines échéances', x:next.map(e=>e.label+' '+dueLabel(e.due)).join(', ')+'.'});
+    }
+    // 0c. ceilings and unusual increases
+    Object.keys(ceilings).forEach(l=>{
+      const used = capUse(l, month), cap = ceilings[l];
+      if(used > cap) out.push({lvl:'alert', t:l+' dépasse son plafond', x:fmt(used)+' Ar prévus pour un plafond de '+fmt(cap)+' Ar (+'+fmt(used-cap)+' Ar).'});
+      else if(used >= cap*0.9 && used>0) out.push({lvl:'warn', t:l+' proche de son plafond', x:fmt(used)+' Ar sur '+fmt(cap)+' Ar ('+Math.round(used/cap*100)+' %).'});
+    });
+    {
+      const labels = [...new Set(cur.rows.map(e=>norm(e.label)))];
+      labels.forEach(l=>{
+        const hist=[1,2,3].map(k=>capUse(l, shiftMonth(month,-k))).filter(v=>v>0);
+        if(hist.length<2) return;
+        const avg=hist.reduce((s,v)=>s+v,0)/hist.length, now=capUse(l, month);
+        if(now > avg*1.25 && now-avg >= 5000) out.push({lvl:'warn', t:l+' en hausse de '+Math.round((now/avg-1)*100)+' %', x:fmt(now)+' Ar ce mois-ci contre '+fmt(avg)+' Ar en moyenne sur vos '+hist.length+' derniers mois.'});
+      });
+    }
+    if(reserve>0 && cur.b && cur.b - cur.paid < reserve) out.push({lvl:'alert', t:'Épargne protégée entamée', x:'Les paiements laissent '+fmt(Math.max(0,cur.b-cur.paid))+' Ar, moins que les '+fmt(reserve)+' Ar à protéger.'});
+    else if(reserve>0 && cur.b && cur.d > cur.b - reserve) out.push({lvl:'warn', t:'Les dépenses prévues touchent l’épargne protégée', x:'Prévu : '+fmt(cur.d)+' Ar pour '+fmt(cur.b-reserve)+' Ar à dépenser. Reportez une ligne pour garder vos '+fmt(reserve)+' Ar.'});
 
     // 1. budget status
     if(!cur.b) out.push({lvl:'warn', t:'Aucun budget saisi', x:'Saisissez votre budget en haut de la page pour calculer le reste et vos économies.'});
@@ -1056,6 +1341,13 @@ body.is-busy .loadbar{opacity:1}
   }
 
   /* ---------- Events ---------- */
+  $('reserve').addEventListener('change',()=>{ const v=parseAmt($('reserve').value); store && store.setReserve(v).then(()=>toast(v?'Épargne protégée : '+fmt(v)+' Ar par mois':'Épargne protégée désactivée')).catch(fail); });
+  $('reserve').addEventListener('blur',()=>{ const v=parseAmt($('reserve').value); $('reserve').value = v?fmt(v):''; });
+  $('capForm').addEventListener('submit',ev=>{ ev.preventDefault(); const l=norm($('capLabel').value), v=parseAmt($('capAmt').value); if(!l||!v) return; store.setCeiling(l,v).then(()=>toast('Plafond de '+l+' : '+fmt(v)+' Ar')).catch(fail); $('capLabel').value=''; $('capAmt').value=''; $('capLabel').focus(); });
+  $('capRows').addEventListener('change',ev=>{ const r=ev.target.closest('.cap-row'); if(!r||ev.target.tagName!=='INPUT') return; const v=parseAmt(ev.target.value); store.setCeiling(r.dataset.label, v).catch(fail); });
+  $('capRows').addEventListener('keydown',ev=>{ if(ev.key==='Enter' && ev.target.tagName==='INPUT') ev.target.blur(); });
+  $('capRows').addEventListener('click',ev=>{ const d=ev.target.closest('.del'); if(!d) return; const l=d.closest('.cap-row').dataset.label; store.setCeiling(l,0).then(()=>toast('Plafond de '+l+' supprimé')).catch(fail); });
+  $('sortDue').addEventListener('click',()=>{ sortDue=!sortDue; try{ localStorage.setItem('budget-sort', sortDue?'due':'order'); }catch(e){} render(); });
   $('goal').addEventListener('change',()=>{ store && store.setGoal(parseAmt($('goal').value)).then(()=>toast('Objectif enregistré')).catch(fail); });
   $('goal').addEventListener('blur',()=>{ const v=parseAmt($('goal').value); $('goal').value = v?fmt(v):''; });
   $('svRows').addEventListener('click',ev=>{ const tr=ev.target.closest('tr[data-m]'); if(tr){ month=tr.dataset.m; render(); showTab('mois'); } });
@@ -1073,29 +1365,35 @@ body.is-busy .loadbar{opacity:1}
     ev.preventDefault();
     const label=$('newLabel').value.trim().toUpperCase(); const amount=parseAmt($('newAmt').value);
     if(!label) return;
-    store.add({month,label,amount,paid:false,createdAt:Date.now()}).then(()=>{ toast(label+' ajouté'); }).catch(fail);
-    $('newLabel').value=''; $('newAmt').value=''; $('newLabel').focus();
+    tryAdd({month,label,amount,paid:false,createdAt:Date.now()}, ()=>{ $('newLabel').value=''; $('newAmt').value=''; $('newLabel').focus(); });
   });
 
   $('rows').addEventListener('change',ev=>{
     const li=ev.target.closest('.row'); if(!li) return; const id=li.dataset.id;
     if(ev.target.classList.contains('lab')){
       const v=ev.target.value.trim().toUpperCase(); if(v) store.update(id,{label:v}).catch(fail);
+    } else if(ev.target.classList.contains('due')){
+      const d=parseAmt(ev.target.value); store.update(id,{due: d>=1 && d<=31 ? d : 0}).catch(fail);
     } else if(ev.target.classList.contains('amt')){
-      store.update(id,{amount:parseAmt(ev.target.value)}).catch(fail);
+      const e=expenses.find(x=>x.id===id), v=parseAmt(ev.target.value);
+      if(e && e.paid){
+        const M=money(month), avail=M.avail+(Number(e.amount)||0);
+        if(M.b && v>avail && avail>=0){ ev.target.value=fmt(e.amount); return openDialog({ title:'Montant trop élevé pour '+e.label, text:'Cette dépense est déjà payée : avec '+fmt(v)+' Ar, les paiements dépasseraient le budget de '+fmt(v-avail)+' Ar.', figs:[['Budget',fmt(M.b)+' Ar'],['Maximum possible',fmt(avail)+' Ar','pos']], opts:[{label:'Mettre '+fmt(avail)+' Ar', detail:'Le maximum que le budget permet', cta:'Appliquer', primary:true, fn:()=>store.update(id,{amount:avail}).catch(fail)}] }); }
+      }
+      store.update(id,{amount:v}).catch(fail);
     }
   });
   $('rows').addEventListener('keydown',ev=>{ if(ev.key==='Enter' && ev.target.tagName==='INPUT') ev.target.blur(); });
   $('rows').addEventListener('click',ev=>{
     const li=ev.target.closest('.row'); if(!li) return; const id=li.dataset.id;
     const chk=ev.target.closest('.chk');
-    if(chk){ const e=expenses.find(x=>x.id===id); store.update(id,{paid:!(e&&e.paid)}).catch(fail); return; }
+    if(chk){ const e=expenses.find(x=>x.id===id); if(!e) return; if(e.paid) store.update(id,{paid:false}).catch(fail); else tryPay(e); return; }
     const star=ev.target.closest('.star');
     if(star){
       const e=expenses.find(x=>x.id===id); if(!e) return;
       const ex=findEss(e.label);
       if(ex) store.removeEss(ex.id).then(()=>toast(norm(e.label)+' retiré des essentielles')).catch(fail);
-      else store.addEss({label:norm(e.label),amount:Number(e.amount)||0,createdAt:Date.now()}).then(()=>toast(norm(e.label)+' ajouté aux essentielles')).catch(fail);
+      else store.addEss({label:norm(e.label),amount:Number(e.amount)||0,createdAt:Date.now(),due:Number(e.due)||0}).then(()=>toast(norm(e.label)+' ajouté aux essentielles')).catch(fail);
       return;
     }
     const del=ev.target.closest('.del');
@@ -1109,6 +1407,7 @@ body.is-busy .loadbar{opacity:1}
     const b=ev.target.closest('.act'); if(!b||!store) return;
     const a=b.dataset.act;
     if(a==='import') importEssentials();
+    else if(a.startsWith('postpone:')){ const ids=a.slice(9).split(','); Promise.all(ids.map(i=>store.update(i,{month:shiftMonth(month,1), paid:false}))).then(()=>toast(plural(ids.length,'ligne')+' reportée'+(ids.length>1?'s':'')+' à '+monthName(shiftMonth(month,1)))).catch(fail); }
     else if(a.startsWith('budget:')){ const v=Number(a.slice(7)); store.setBudget(month,v).then(()=>toast('Budget de '+fmt(v)+' Ar appliqué')).catch(fail); }
   });
   $('importEss').addEventListener('click', importEssentials);
@@ -1126,6 +1425,7 @@ body.is-busy .loadbar{opacity:1}
     const li=ev.target.closest('.row'); if(!li) return; const id=li.dataset.id;
     if(ev.target.classList.contains('lab')){ const v=norm(ev.target.value); if(v) store.updateEss(id,{label:v}).catch(fail); }
     else if(ev.target.classList.contains('amt')) store.updateEss(id,{amount:parseAmt(ev.target.value)}).catch(fail);
+    else if(ev.target.classList.contains('due')){ const d=parseAmt(ev.target.value); store.updateEss(id,{due: d>=1 && d<=31 ? d : 0}).catch(fail); }
   });
   $('essRows').addEventListener('keydown',ev=>{ if(ev.key==='Enter' && ev.target.tagName==='INPUT') ev.target.blur(); });
   $('essRows').addEventListener('click',ev=>{
@@ -1136,7 +1436,7 @@ body.is-busy .loadbar{opacity:1}
   $('essFromMonth').addEventListener('click', async ()=>{
     try{
       let t=Date.now(), n=0;
-      const ps=[]; for(const e of monthRows(month)){ if(!findEss(e.label)){ ps.push(store.addEss({label:norm(e.label),amount:Number(e.amount)||0,createdAt:t++})); n++; } }
+      const ps=[]; for(const e of monthRows(month)){ if(!findEss(e.label)){ ps.push(store.addEss({label:norm(e.label),amount:Number(e.amount)||0,createdAt:t++,due:Number(e.due)||0})); n++; } }
       await Promise.all(ps);
       toast(n+' dépenses enregistrées comme essentielles');
     }catch(e){ fail(e); }
@@ -1146,7 +1446,7 @@ body.is-busy .loadbar{opacity:1}
     const prev=shiftMonth(month,-1); const src=monthRows(prev);
     try{
       let t=Date.now();
-      await Promise.all(src.map(e=>store.add({month,label:e.label,amount:e.amount,paid:false,createdAt:t++})));
+      await Promise.all(src.map(e=>store.add({month,label:e.label,amount:e.amount,paid:false,createdAt:t++,due:Number(e.due)||0})));
       if(!budgets[month] && budgets[prev]) await store.setBudget(month,budgets[prev]);
       toast(src.length+' lignes reprises de '+monthName(prev));
     }catch(e){ fail(e); }
