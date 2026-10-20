@@ -556,6 +556,8 @@ body.is-busy .loadbar{opacity:1}
 .g-add input{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:6px 9px;text-align:right;font-variant-numeric:tabular-nums}
 .g-add input:focus{border-color:var(--brand);outline:none}
 .g-add .btn{padding:6px 10px;font-size:.78rem}
+.g-add{flex-wrap:wrap}
+.g-add input{flex:1 1 120px}
 
 .chart-card{min-height:0}
 .sel{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 8px;font-size:.8rem;font-weight:600;color:var(--ink-2);max-width:60%}
@@ -599,6 +601,9 @@ body.is-busy .loadbar{opacity:1}
   .fab{bottom:calc(80px + env(safe-area-inset-bottom, 0px));right:max(16px, env(safe-area-inset-right, 0px))}
   .chart-box{min-height:220px;flex:none;height:220px}
   .pane.active{padding-bottom:76px}
+  .pane.active > *{flex-shrink:0}
+  .eco-main{display:flex;flex-direction:column}
+  .eco-main .card{overflow:visible}
   .eco-main .sv-table{min-width:520px}
 }
 @media (prefers-reduced-motion:reduce){ .fab{transition:none} }
@@ -1715,12 +1720,13 @@ body.is-busy .loadbar{opacity:1}
     goals.slice().sort((a,b)=>(a.createdAt||0)-(b.createdAt||0)).forEach(g=>{
       const t=Number(g.target)||0, sv=Number(g.saved)||0, pct=t? Math.min(100, sv/t*100) : 0, need=Math.max(0,t-sv);
       const el=document.createElement('div'); el.className='goal'+(sv>=t&&t>0?' done':''); el.dataset.id=g.id;
-      el.innerHTML='<div class="g-top"><b></b><span class="g-pct"></span><button type="button" class="del" aria-label="Supprimer l’objectif">×</button></div><div class="g-bar"><i></i></div><div class="g-sub"></div><form class="g-add"><input inputmode="numeric" placeholder="Montant" aria-label="Montant à mettre de côté"><button class="btn ghost" type="submit">Mettre de côté</button></form>';
+      el.innerHTML='<div class="g-top"><b></b><span class="g-pct"></span><button type="button" class="del" aria-label="Supprimer l’objectif">×</button></div><div class="g-bar"><i></i></div><div class="g-sub"></div><form class="g-add"><input inputmode="numeric" placeholder="Montant à ajouter" aria-label="Montant à mettre de côté"><button class="btn" type="submit">Ajouter</button><button class="btn ghost g-all" type="button">Tout le non réparti</button></form>';
       el.querySelector('b').textContent=g.name;
       el.querySelector('.g-pct').textContent=Math.floor(pct)+' %';
       el.querySelector('.g-bar i').style.width=pct+'%';
       el.querySelector('.g-sub').textContent = fmt(sv)+' / '+fmt(t)+' Ar'+(need>0 ? ' · il manque '+fmt(need)+' Ar'+(avgM>0?' · environ '+Math.ceil(need/avgM)+' mois':'') : ' · objectif atteint');
       const inp=el.querySelector('input'); inp.dataset.key='g-'+g.id;
+      const allB=el.querySelector('.g-all'); allB.hidden = goalFree < 1000 || need<=0; allB.textContent = need>0 && goalFree>need ? 'Compléter ('+fmt(need)+' Ar)' : 'Tout le non réparti ('+fmt(Math.max(0,goalFree))+' Ar)';
       box.appendChild(el);
     });
     if(fk){ const e=box.querySelector('[data-key="'+fk+'"]'); if(e) e.focus(); }
@@ -1799,7 +1805,8 @@ body.is-busy .loadbar{opacity:1}
   document.addEventListener('keydown', ev=>{ if(ev.key==='Escape' && !$('linePanel').hidden && $('dlg').hidden) closeLine(); });
   $('goalForm').addEventListener('submit', ev=>{ ev.preventDefault(); const n=$('goalName').value.trim(), t=parseAmt($('goalTarget').value); if(!n||!t) return; store.addGoal({name:n, target:t, saved:0, createdAt:Date.now()}).then(()=>toast('Objectif « '+n+' » créé')).catch(fail); $('goalName').value=''; $('goalTarget').value=''; });
   $('goalList').addEventListener('submit', ev=>{ ev.preventDefault(); const el=ev.target.closest('.goal'); if(!el) return; const g=goals.find(x=>x.id===el.dataset.id); const raw=ev.target.querySelector('input').value.trim(); const v=(raw.startsWith('-')?-1:1)*Math.abs(parseAmt(raw)); if(g && v) allocate(g, v); ev.target.querySelector('input').value=''; });
-  $('goalList').addEventListener('click', ev=>{ const d=ev.target.closest('.del'); if(!d) return; const id=d.closest('.goal').dataset.id, g=goals.find(x=>x.id===id);
+  $('goalList').addEventListener('click', ev=>{ const ab=ev.target.closest('.g-all'); if(ab){ const g=goals.find(x=>x.id===ab.closest('.goal').dataset.id); if(g){ const need=Math.max(0,(Number(g.target)||0)-(Number(g.saved)||0)); allocate(g, Math.min(need, Math.max(0,goalFree))); } return; }
+    const d=ev.target.closest('.del'); if(!d) return; const id=d.closest('.goal').dataset.id, g=goals.find(x=>x.id===id);
     if(d.classList.contains('confirm')) store.removeGoal(id).then(()=>toast('Objectif supprimé : son montant redevient non réparti')).catch(fail);
     else { d.classList.add('confirm'); d.textContent='Suppr.?'; setTimeout(()=>{ if(d.isConnected){ d.classList.remove('confirm'); d.textContent='×'; } },3000); } });
   $('sortDue').addEventListener('click',()=>{ sortDue=!sortDue; try{ localStorage.setItem('budget-sort', sortDue?'due':'order'); }catch(e){} render(); });
