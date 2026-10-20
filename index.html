@@ -1022,6 +1022,16 @@ body.locked .app,body.locked .fab{filter:blur(14px);pointer-events:none;user-sel
 .lk-foot svg{width:14px;height:14px;flex:none}
 @media (max-height:640px){ .lk-mark{width:54px;height:54px} .lk-card{padding:20px 20px 16px;gap:8px} .lk-name{font-size:1.5rem} .lk-sub{display:none} }
 @media (prefers-reduced-motion:reduce){ .lock,.lock.out,.lk-card,.lk-field.bad,.lk-spin{animation:none!important} .lock.out{opacity:0} }
+
+/* ===== Log out ===== */
+.logout{display:flex;align-items:center;justify-content:center;gap:8px;margin:4px 4px 0;border:1px solid rgba(255,255,255,.16);background:none;color:#FFD9D3;border-radius:10px;padding:8px 10px;font-size:.8rem;font-weight:600}
+.logout:hover{background:rgba(255,120,100,.14);border-color:rgba(255,160,140,.45);color:#fff}
+.logout svg{width:16px;height:16px}
+.logout-top{gap:6px;padding:7px 11px}
+.logout-top svg{width:16px;height:16px}
+.logout-top:hover{color:var(--neg);border-color:var(--neg)}
+@media (min-width:861px){ .logout-top{display:none} }
+@media (max-width:520px){ .logout-top span{display:none} .logout-top{padding:8px 10px} }
 </style>
 </head>
 <body>
@@ -1091,6 +1101,7 @@ body.locked .app,body.locked .fab{filter:blur(14px);pointer-events:none;user-sel
         <button type="button" id="syncNow">Actualiser</button>
         <button type="button" id="openSetup">Réglages</button>
       </div>
+      <button type="button" class="logout" id="logoutSide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg><span>Se déconnecter</span></button>
     </div>
   </aside>
 
@@ -1106,7 +1117,7 @@ body.locked .app,body.locked .fab{filter:blur(14px);pointer-events:none;user-sel
           <span id="monthLabel">—</span>
           <button id="next" type="button" aria-label="Mois suivant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
         </div>
-        <button class="btn ghost icon" id="lockNow" type="button" aria-label="Verrouiller" title="Verrouiller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button>
+        <button class="btn ghost logout-top" id="lockNow" type="button" aria-label="Se déconnecter" title="Se déconnecter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg><span>Déconnexion</span></button>
         <button class="btn" id="importEss" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M6 10l6 6 6-6M5 20h14"/></svg><span>Importer les essentielles</span></button>
       </div>
     </header>
@@ -2848,7 +2859,16 @@ body.locked .app,body.locked .fab{filter:blur(14px);pointer-events:none;user-sel
     }).finally(()=>{ go.disabled=false; go.classList.remove('busy'); setTimeout(()=>go.classList.remove('ok'), 800); });
   });
   function lockNow(){ cfgSet(''); showLock(); }
-  $('lockNow').addEventListener('click', lockNow);
+  // Log out: forget the password and wipe the figures from the page
+  function logout(){
+    cfgSet(''); loaded = false;
+    expenses=[]; budgets={}; essentials=[]; payments=[]; goals=[]; ceilings={}; reserve=0; periodEnds={};
+    document.querySelector('.app').classList.add('loading'); render();
+    $('setup').hidden = true; closeLine(); $('quick').hidden = true; $('dlg').hidden = true;
+    showLock(); $('lockErr').textContent=''; $('lockHi').textContent='Vous êtes déconnecté';
+  }
+  $('lockNow').addEventListener('click', logout);
+  $('logoutSide').addEventListener('click', logout);
   // Locks again after 10 minutes in the background
   let hiddenAt = 0;
   document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') hiddenAt=Date.now(); else if(hiddenAt && Date.now()-hiddenAt > 10*60*1000 && cfgGet().key) lockNow(); });
