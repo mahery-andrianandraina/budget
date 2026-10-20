@@ -4,11 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Budget Mahery</title>
-<meta name="theme-color" content="#1B2A6E">
-<title>Budget Mahery</title>
+<meta name="theme-color" content="#0B3B3C">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700&family=Albert+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: fixed side navigation + one working view at a time; the page never scrolls, long lists scroll inside their panel.
    References: Monarch Money (navigation), Copilot Money (spending ring + category list), YNAB (key-figure strip). */
@@ -730,6 +729,155 @@ body.is-busy .loadbar{opacity:1}
 .qk-mode small{font-size:.74rem;color:var(--muted)}
 .qk-mode.off{opacity:.5;cursor:default}
 .qk-none{grid-column:1 / -1}
+
+/* ===== Design « Mobile d'abord » : sarcelle profond, accent jaune, Outfit ===== */
+:root{
+  --bg:#F3F5F4; --surface:#FFFFFF; --surface-2:#F7F9F8; --ink:#0F1F1F; --ink-2:#2E4444; --muted:#5B6F6F; --line:#DCE3E2;
+  --brand:#0B5F5A; --brand-soft:#E1F0EE;
+  --warn:#9A6B00; --warn-soft:#FFF4D6;
+  --teal:#0B3B3C; --teal-2:#134E4F; --teal-ink:#A8C9C5; --acc:#FFC93C; --acc-ink:#0B3B3C;
+  --c1:#0B5F5A; --c2:#14A08A; --c3:#E0A100; --c4:#E2605A; --c5:#5446C9; --c6:#3B9EDB; --c7:#B5BDCB;
+  --f-display:"Outfit","Segoe UI",system-ui,sans-serif; --f-ui:"Outfit","Segoe UI",system-ui,sans-serif;
+  --r:18px; --shadow:0 1px 2px rgba(11,59,60,.06);
+  --grad:linear-gradient(135deg,#0B3B3C,#0F4C4D); --grad-nav:#0B3B3C;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0A1414; --surface:#112020; --surface-2:#152828; --ink:#E9F2F1; --ink-2:#C2D3D1; --muted:#87A09D; --line:#223636;
+  --brand:#4FC7B8; --brand-soft:#123331; --warn:#FFC93C; --warn-soft:#2B2410;
+  --teal:#0F4A4B; --teal-2:#175C5D; --teal-ink:#A8C9C5;
+  --c1:#4FC7B8; --c2:#2EC4A8; --c3:#FFC93C; --c4:#F07B74; --c5:#A194FF; --c6:#62C3F2; --c7:#5A6478;
+  --grad:linear-gradient(135deg,#0F4A4B,#13585A); --grad-nav:#081010; --shadow:none}}
+:root[data-theme="dark"]{
+  --bg:#0A1414; --surface:#112020; --surface-2:#152828; --ink:#E9F2F1; --ink-2:#C2D3D1; --muted:#87A09D; --line:#223636;
+  --brand:#4FC7B8; --brand-soft:#123331; --warn:#FFC93C; --warn-soft:#2B2410;
+  --teal:#0F4A4B; --teal-2:#175C5D; --teal-ink:#A8C9C5;
+  --c1:#4FC7B8; --c2:#2EC4A8; --c3:#FFC93C; --c4:#F07B74; --c5:#A194FF; --c6:#62C3F2; --c7:#5A6478;
+  --grad:linear-gradient(135deg,#0F4A4B,#13585A); --grad-nav:#081010; --shadow:none}
+
+body{background:var(--bg);font-size:15px}
+.cap{letter-spacing:.04em}
+.side,.side{background:var(--grad-nav)}
+.logo{background:var(--acc);color:var(--acc-ink);box-shadow:none}
+.tabs button[aria-selected="true"]{background:rgba(255,255,255,.12);box-shadow:none}
+.tabs button[aria-selected="true"] svg{color:var(--acc)}
+.tabs .badge{background:var(--acc);color:var(--acc-ink)}
+.sm-bar i{background:var(--acc)}
+.side-month{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);backdrop-filter:none}
+.topbar h1{background:none;color:var(--ink);-webkit-background-clip:border-box;background-clip:border-box;font-weight:600}
+.btn{border-radius:12px}
+.btn:not(.ghost):not(.done){background:var(--teal);box-shadow:none}
+.card,.kpis,.aside{border-color:transparent;box-shadow:var(--shadow)}
+.card-h{background:var(--surface);border-bottom-color:var(--line)}
+.card-h h2,.sec-h h2{font-weight:600}
+.monthnav{border-radius:99px}
+.loadbar::before{background:var(--acc)}
+.toast{background:var(--teal);color:#fff;border-radius:14px}
+.meter .paid{background:var(--c2)} .meter .plan{background:var(--acc)}
+.mini i.pos{background:var(--c2)}
+.chk[aria-pressed="true"]{background:var(--pos-soft)}
+.insight,.insight.warn,.insight.alert,.insight.good{border-image:none;border-left-width:3px}
+.lg-spent{background:var(--brand)}
+.qk-amt{border-bottom-color:var(--teal)}
+.dlg{border-radius:22px}
+.dlg-opt{border-radius:14px}
+
+/* Remove the old highlighted "Reste" tile: the hero card now carries the key figure */
+.kpi:nth-child(3){background:none;color:inherit}
+.kpi:nth-child(3) .cap,.kpi:nth-child(3) .d,.kpi:nth-child(3) .v small{color:var(--muted)}
+.kpi:nth-child(3) .v{color:var(--ink)} .kpi:nth-child(3) .v.pos{color:var(--pos)} .kpi:nth-child(3) .v.neg{color:var(--neg)}
+.kpi:nth-child(3) .d b.up{color:var(--neg)} .kpi:nth-child(3) .d b.down{color:var(--pos)}
+.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+.kpi,.kpi:nth-child(3),.kpi:nth-child(4){border-left:0;border-top:0}
+.kpi:nth-child(even){border-left:1px solid var(--line)}
+.kpi:nth-child(n+3){border-top:1px solid var(--line)}
+.kpi:first-child{border-radius:0}
+
+/* Hero: today's allowance */
+.hero{background:var(--teal);color:#fff;border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.hero-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.hero-top > span:first-child{font-size:.92rem;color:var(--teal-ink)}
+.hero-days{flex:none;font-size:.76rem;font-weight:600;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.12);color:#fff;white-space:nowrap}
+.hero-v{font-size:3rem;font-weight:700;letter-spacing:-.03em;line-height:1;white-space:nowrap}
+.hero-v small{font-size:1.2rem;font-weight:500;color:var(--teal-ink);margin-left:6px;letter-spacing:0}
+.hero-v.neg{color:#FFB4A8}
+.hero-mini{display:flex;gap:8px}
+.hero-mini div{flex:1;min-width:0;background:var(--teal-2);border-radius:14px;padding:9px 12px;display:flex;flex-direction:column}
+.hero-mini span{font-size:.72rem;color:var(--teal-ink)}
+.hero-mini b{font-size:1.02rem;font-weight:600}
+.hero-mini b.acc{color:var(--acc)}
+
+/* Envelope cards + recent payments (phone layout) */
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:2px 2px 10px}
+.sec-h h2{margin:0;font-family:var(--f-display);font-size:1.1rem}
+.sec-h span{font-size:.76rem;color:var(--muted)}
+.env-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 6px;margin:0 -2px;scrollbar-width:none}
+.env-row::-webkit-scrollbar{display:none}
+.env-card{flex:none;width:150px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;border:2px solid transparent;background:var(--surface);border-radius:20px;padding:14px;box-shadow:var(--shadow);color:var(--ink);min-width:0}
+.env-card:active{transform:scale(.98)}
+.env-ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-style:normal;font-weight:700;font-size:1rem;margin-bottom:6px;
+  background:color-mix(in srgb,var(--ec,var(--brand)) 14%,var(--surface));color:var(--ec,var(--brand))}
+.env-n{font-size:.92rem;font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.env-v{font-size:1.4rem;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.env-of{font-size:.74rem;color:var(--muted)}
+.env-s{font-size:.76rem;color:var(--muted);font-weight:500}
+.env-bar{display:block;width:100%;height:4px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
+.env-bar u{display:block;height:100%;background:var(--ec,var(--brand));text-decoration:none;border-radius:99px}
+.env-card.low{border-color:var(--acc)} .env-card.low .env-s{color:var(--warn);font-weight:600}
+.env-card.over{border-color:var(--neg)} .env-card.over .env-s,.env-card.over .env-v{color:var(--neg)} .env-card.over .env-bar u{background:var(--neg)}
+.env-card.done{opacity:.62} .env-card.done .env-v{font-size:1.1rem;color:var(--pos)}
+.env-card.other{border:2px dashed var(--line);background:none;box-shadow:none;justify-content:center}
+.env-card.other .env-ic{background:var(--acc);color:var(--acc-ink);font-size:1.3rem}
+.recent-list{list-style:none;margin:0;padding:2px 16px;background:var(--surface);border-radius:20px;box-shadow:var(--shadow)}
+.recent-list li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.recent-list li:last-child{border-bottom:0}
+.recent-list li div{display:flex;flex-direction:column;min-width:0}
+.recent-list li b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent-list li span{font-size:.76rem;color:var(--muted)}
+.recent-list li strong{font-weight:600;white-space:nowrap}
+
+/* Big "+" button: yellow */
+.fab{background:var(--acc);color:var(--acc-ink);border-radius:22px;box-shadow:0 10px 24px rgba(224,161,0,.35)}
+
+/* Desktop: hero beside the key figures, list underneath */
+@media (min-width:861px){
+  .p-mois.active{grid-template-rows:auto minmax(0,1fr)}
+  .p-mois .hero{grid-column:1;grid-row:1;justify-content:space-between}
+  .p-mois .hero-v{font-size:3.4rem}
+  .p-mois .kpis{grid-column:2;grid-row:1}
+  .p-mois .env,.p-mois .recent{display:none!important}
+  .p-mois > section[aria-label="Dépenses"]{grid-column:1;grid-row:2}
+  .p-mois > .spend{grid-column:2;grid-row:2}
+  .kpi{padding:12px 16px}
+  .kpi .v{font-size:1.35rem}
+}
+@media (max-height:860px) and (min-width:861px){
+  .hero{padding:14px 18px;gap:8px;border-radius:20px}
+  .hero-v{font-size:2.3rem}
+  .hero-mini div{padding:6px 10px}
+}
+
+/* Phone: bottom bar with the "+" in the middle */
+@media (max-width:860px){
+  .side{background:var(--surface);border-top:1px solid var(--line);padding-top:4px}
+  .tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) 76px repeat(2,minmax(0,1fr));align-items:center}
+  .tabs button[data-tab="ess"]{grid-column:4}
+  .tabs button{color:var(--muted);font-size:.7rem;font-weight:500}
+  .tabs button:hover{background:none}
+  .tabs button[aria-selected="true"]{background:none;color:var(--teal);font-weight:700}
+  .tabs button[aria-selected="true"] svg{color:var(--teal)}
+  .fab{left:50%;right:auto;transform:translateX(-50%);bottom:calc(26px + env(safe-area-inset-bottom, 0px));width:60px;height:60px;border:4px solid var(--bg)}
+  .fab:hover{transform:translateX(-50%) translateY(-2px)} .fab:active{transform:translateX(-50%) scale(.96)}
+  .toast{bottom:calc(100px + env(safe-area-inset-bottom, 0px))}
+  .pane.active{padding-bottom:40px}
+  .p-mois.active{gap:16px}
+  .p-mois .hero{margin-top:2px}
+  .topbar h1{font-size:1.25rem}
+  .card{border-radius:20px}
+}
+@media (max-width:860px) and (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tabs button[aria-selected="true"],:root:not([data-theme="light"]) .tabs button[aria-selected="true"] svg{color:var(--acc)}}
+:root[data-theme="dark"] .tabs button[aria-selected="true"]{color:var(--acc)}
+@media (max-width:380px){ .hero-v{font-size:2.5rem} .env-card{width:136px} }
+@media (prefers-reduced-motion:reduce){ .env-card:active{transform:none} }
 </style>
 </head>
 <body>
@@ -829,6 +977,22 @@ body.is-busy .loadbar{opacity:1}
     <main class="board">
       <!-- MOIS -->
       <div class="pane p-mois" data-pane="mois">
+        <section class="hero" aria-label="Aujourd'hui" aria-live="polite">
+          <div class="hero-top"><span id="heroLab">Aujourd'hui, vous pouvez dépenser</span><span class="hero-days" id="heroDays"></span></div>
+          <span class="hero-v num" id="heroWrap"><span id="heroDay">0</span><small>Ar</small></span>
+          <div class="hero-mini">
+            <div><span>Disponible</span><b class="num" id="heroAvail">0</b></div>
+            <div><span id="heroTodayLab">Noté aujourd'hui</span><b class="num acc" id="heroToday">0</b></div>
+          </div>
+        </section>
+        <section class="env" aria-label="Enveloppes">
+          <div class="sec-h"><h2>Enveloppes</h2><span>touchez une carte pour noter</span></div>
+          <div class="env-row" id="envRow"></div>
+        </section>
+        <section class="recent" id="recentBox" aria-label="Récemment" hidden>
+          <div class="sec-h"><h2>Récemment</h2></div>
+          <ul class="recent-list" id="recentList"></ul>
+        </section>
         <div class="kpis">
           <div class="kpi">
             <label class="cap" for="budget">Budget du mois</label>
@@ -1211,6 +1375,7 @@ body.is-busy .loadbar{opacity:1}
     $('barPlan').style.width = ((total-paid)/base*100)+'%';
     $('bar').classList.toggle('over', budget>0 && total>budget);
     $('pct').textContent = budget ? Math.round(total/budget*100)+' % utilisé' : 'Cliquez pour saisir le budget';
+    renderHero(rows, budget, paid, availNow);
 
     // rows — keep focus on the field being edited
     const focused = document.activeElement && document.activeElement.closest('.row') ? document.activeElement.dataset.key : null;
@@ -1343,6 +1508,62 @@ body.is-busy .loadbar{opacity:1}
     if(focusedKey){ const el=box.querySelector('[data-key="'+focusedKey+'"]'); if(el) el.focus(); }
     const dl=$('capList'); const opts=new Set(expenses.map(e=>norm(e.label)).concat(essentials.map(e=>norm(e.label))));
     dl.innerHTML=''; [...opts].sort().forEach(v=>{ const o=document.createElement('option'); o.value=v; dl.appendChild(o); });
+  }
+
+  /* ---------- Mobile-first summary: today's allowance, envelope cards, recent payments ---------- */
+  function renderHero(rows, budget, paid, availNow){
+    const P=periodOf(month), D=daysInfo(month), t=todayISO(), cur = t>=P.start && t<=P.end;
+    const over = budget>0 && availNow<0;
+    const perDay = cur && D.left>0 ? Math.floor(Math.max(0,availNow)/D.left) : Math.max(0,availNow);
+    $('heroLab').textContent = !budget ? 'Saisissez le budget du mois pour commencer' : over ? 'Budget dépassé de' : cur ? 'Aujourd’hui, vous pouvez dépenser' : t>P.end ? 'Il restait sur cette période' : 'Disponible pour cette période';
+    tween($('heroDay'), !budget ? 0 : over ? -availNow : perDay);
+    $('heroWrap').classList.toggle('neg', over);
+    $('heroDays').textContent = cur ? (D.left>1 ? 'J-'+(D.left-1) : 'Dernier jour') : fmtShort(P.start)+' → '+fmtShort(P.end);
+    $('heroDays').title = 'Fin de période : '+fmtLong(P.end);
+    $('heroAvail').textContent = budget ? fmt(availNow) : '—';
+    const ids = new Set(rows.map(e=>e.id));
+    const todaySum = payments.filter(x=>ids.has(x.expenseId) && x.date===t).reduce((s,x)=>s+(Number(x.amount)||0),0);
+    $('heroTodayLab').textContent = cur ? 'Noté aujourd’hui' : 'Dépensé';
+    $('heroToday').textContent = fmt(cur ? todaySum : paid);
+
+    const box=$('envRow'); box.innerHTML='';
+    const ratio = e => { const a=Number(e.amount)||0; return a ? spentOf(e)/a : 0; };
+    const list = rows.slice().sort((a,b)=> settled(a)-settled(b) || ratio(b)-ratio(a));
+    list.forEach((e,i)=>{
+      const a=Number(e.amount)||0, sp=spentOf(e), st=stateOf(e), left=Math.max(0,a-sp), pct=a? Math.floor(sp/a*100) : 0;
+      const b=document.createElement('button'); b.type='button';
+      b.className='env-card '+st+(st==='part' && pct>=80 ? ' low' : '');
+      b.style.setProperty('--ec', 'var(--c'+((rows.indexOf(e)%6)+1)+')');
+      b.innerHTML='<i class="env-ic" aria-hidden="true"></i><b class="env-n"></b><span class="env-v num"></span><small class="env-of num"></small><span class="env-s"></span><span class="env-bar"><u></u></span>';
+      b.querySelector('.env-ic').textContent = (e.label||'?').trim().charAt(0).toUpperCase();
+      b.querySelector('.env-n').textContent = e.label;
+      b.querySelector('.env-v').textContent = st==='done' ? 'Réglée' : fmt(left);
+      b.querySelector('.env-of').textContent = st==='done' ? fmt(sp)+' Ar' : 'sur '+fmt(a);
+      b.querySelector('.env-s').textContent = st==='over' ? 'Dépassé de '+fmt(sp-a)+' Ar' : st==='done' ? 'Payée' : pct>=80 ? pct+' % utilisé' : (cur && D.left>0 && sp>0 ? fmt(Math.floor(left/D.left))+' Ar / jour' : st==='part' ? pct+' % utilisé' : 'À payer');
+      b.querySelector('u').style.width = Math.min(100,pct)+'%';
+      b.setAttribute('aria-label', e.label+' : '+b.querySelector('.env-s').textContent);
+      b.addEventListener('click', ()=>openLine(e));
+      box.appendChild(b);
+    });
+    const o=document.createElement('button'); o.type='button'; o.className='env-card other';
+    o.innerHTML='<i class="env-ic" aria-hidden="true">+</i><b class="env-n">Autre dépense</b><span class="env-s">hors enveloppe</span>';
+    o.addEventListener('click', ()=>{ openQuick(); const x=$('qkList').querySelector('[data-id="__other"]'); if(x) x.click(); });
+    box.appendChild(o);
+
+    const ul=$('recentList'); ul.innerHTML='';
+    const byId = Object.fromEntries(rows.map(e=>[e.id,e]));
+    const rec = payments.filter(x=>byId[x.expenseId]).sort((a,b)=> (a.date<b.date?1:a.date>b.date?-1:0)).slice(0,4);
+    $('recentBox').hidden = !rec.length;
+    const yest = addDays(t,-1);
+    rec.forEach(x=>{
+      const e=byId[x.expenseId], li=document.createElement('li');
+      li.innerHTML='<div><b></b><span></span></div><strong class="num"></strong>';
+      li.querySelector('b').textContent = x.label && norm(x.label)!==norm(e.label) ? x.label : e.label;
+      li.querySelector('span').textContent = (x.date===t ? 'Aujourd’hui' : x.date===yest ? 'Hier' : fmtShort(x.date)) + (x.label && norm(x.label)!==norm(e.label) ? ' · pris sur '+e.label : '');
+      li.querySelector('strong').textContent = '− '+fmt(x.amount);
+      li.addEventListener('click', ()=>openLine(e));
+      ul.appendChild(li);
+    });
   }
 
   function pill(e, availNow){
