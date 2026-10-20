@@ -673,6 +673,46 @@ body.is-busy .loadbar{opacity:1}
 .goal-form #goalName{grid-column:1 / -1}
 @media (max-width:520px){ .row .due{font-size:.68rem;padding:4px 1px} .goal-form{grid-template-columns:1fr 1fr!important} .goal-form #goalName{grid-column:1 / -1} .goal-form .btn{grid-column:1 / -1;justify-content:center} .ess-strip .btn{margin-left:0;width:100%;justify-content:center} }
 @media (prefers-reduced-motion:reduce){ .cal{animation:none} .switch span,.switch span::after{transition:none} }
+
+/* ===== Room for the expense list ===== */
+.ess-strip{padding:8px 18px;gap:6px 20px}
+.ess-strip > div{flex-direction:row;align-items:baseline;gap:8px}
+.ess-strip b{font-size:.98rem}
+.kpi .d + .period{margin-top:0}
+.p-mois .card .scroll{min-height:150px}
+@media (max-height:860px) and (min-width:861px){
+  .main{padding-block:12px 12px;gap:10px}
+  .topbar h1{font-size:1.3rem} .topbar .sub{display:none}
+  .pane.active{gap:12px}
+  .p-mois.active{grid-template-rows:auto minmax(380px,1fr);overflow-y:auto;padding-right:2px}
+  .kpi{padding:9px 14px;gap:3px}
+  .kpi .v{font-size:1.25rem}
+  #budget{font-size:1.15rem;padding:1px 8px}
+  .kpi .meter{margin:2px 0}
+  .kpi .d{font-size:.72rem}
+  .kpi:first-child{flex-direction:row;flex-wrap:wrap;align-items:center;column-gap:8px}
+  .kpi:first-child .cap,.kpi:first-child #budget{flex:1 1 100%}
+  .card-h{padding:9px 16px}
+  .card-h h2{font-size:.95rem}
+  .thead{padding-top:6px;padding-bottom:6px}
+  .row{min-height:38px}
+  .foot{padding:7px 18px}
+  .foot b{font-size:1rem}
+  form.add{padding:8px 12px}
+  form.add input{padding:6px 10px}
+  form.add .btn{padding:6px 12px}
+  .chips{padding:0 12px 8px}
+  .ring-wrap{padding:10px 16px;grid-template-columns:110px minmax(0,1fr)}
+  #ring{width:110px;height:110px}
+  .breakdown li{padding:6px 16px}
+}
+@media (max-height:700px) and (min-width:861px){
+  .chips{display:none}
+  .kpi .d#totalDelta,.kpi .d#resteDelta,.kpi .d#kpiSaveSub{display:none}
+  .p-mois.active{grid-template-rows:auto minmax(340px,1fr)}
+  .side .brand small,.tabs .cap{display:none}
+  .side{gap:14px}
+}
 </style>
 </head>
 <body>
@@ -1194,8 +1234,8 @@ body.is-busy .loadbar{opacity:1}
       else {
         const tot=er.reduce((s,e)=>s+(Number(e.amount)||0),0), left=er.reduce((s,e)=>s+leftOf(e),0), done=er.filter(settled).length, margin=budget-reserve-tot;
         strip.hidden=false; strip.className='ess-strip'+(left===0?' ok':'');
-        strip.innerHTML='<div><span class="cap">Essentielles</span><b>'+fmt(tot)+' Ar</b><small>'+done+' sur '+er.length+' réglée'+(done>1?'s':'')+'</small></div>'+
-          '<div><span class="cap">Vraie marge</span><b class="'+(margin<0?'neg':'')+'">'+(budget?fmt(margin)+' Ar':'—')+'</b><small>budget'+(reserve>0?' − épargne protégée':'')+' − essentielles</small></div>'+
+        strip.innerHTML='<div title="'+done+' sur '+er.length+' réglée'+(done>1?'s':'')+'"><span class="cap">Essentielles</span><b>'+fmt(tot)+' Ar</b><small>'+done+'/'+er.length+' réglée'+(done>1?'s':'')+'</small></div>'+
+          '<div title="Budget'+(reserve>0?' − épargne protégée':'')+' − essentielles"><span class="cap">Vraie marge</span><b class="'+(margin<0?'neg':'')+'">'+(budget?fmt(margin)+' Ar':'—')+'</b></div>'+
           (left>0 ? '<button type="button" class="btn" id="payEss">Régler les essentielles ('+fmt(left)+' Ar)</button>' : '<span class="ess-ok">Essentielles réglées</span>');
       } }
     renderSavings();
