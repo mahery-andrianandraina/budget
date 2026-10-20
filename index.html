@@ -607,6 +607,72 @@ body.is-busy .loadbar{opacity:1}
   .eco-main .sv-table{min-width:520px}
 }
 @media (prefers-reduced-motion:reduce){ .fab{transition:none} }
+
+/* ===== Calendar, period, essentials strip, goal plan ===== */
+.row .due{border:1px solid transparent;background:none;border-radius:7px;padding:5px 4px;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;cursor:pointer}
+.row .due:hover{border-color:var(--line);background:var(--surface);color:var(--ink)}
+.row.due-late .due{background:var(--neg-soft);color:var(--neg);font-weight:700}
+.row.due-soon .due{background:var(--warn-soft);color:var(--warn);font-weight:700}
+.row.is-paid .due{background:none;color:var(--muted);font-weight:400}
+.cal-back{position:fixed;inset:0;z-index:46}
+.cal{position:fixed;z-index:47;width:304px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px rgba(10,15,30,.22);padding:12px;display:flex;flex-direction:column;gap:8px;animation:dlgIn .18s ease-out}
+.cal.sheet{left:0!important;right:0;top:0!important;bottom:0;margin:auto;height:fit-content;width:min(340px,calc(100vw - 32px))}
+@media (max-width:560px){ .cal-back{background:rgba(10,15,30,.4)} }
+.cal-top{display:flex;flex-direction:column;gap:1px;padding:2px 4px 4px}
+.cal-top b{font-family:var(--f-display);font-size:.98rem}
+.cal-top span{font-size:.74rem;color:var(--muted)}
+.cal-top span:empty{display:none}
+.cal-h{display:flex;align-items:center;justify-content:space-between}
+.cal-h span{font-weight:600;text-transform:capitalize}
+.cal-h button{border:0;background:none;width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--ink-2)}
+.cal-h button:hover{background:var(--surface-2)}
+.cal-h svg{width:16px;height:16px}
+.cal-w,.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-w span{font-size:.66rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:center;padding:2px 0}
+.cal-g button{height:36px;border:0;background:none;border-radius:9px;font-variant-numeric:tabular-nums;font-size:.86rem;color:var(--ink)}
+.cal-g button:hover{background:var(--surface-2)}
+.cal-g button.out{color:var(--muted);opacity:.55}
+.cal-g button.inr{background:color-mix(in srgb,var(--brand-soft) 55%,transparent);border-radius:0}
+.cal-g button.rs{border-radius:9px 0 0 9px} .cal-g button.re{border-radius:0 9px 9px 0} .cal-g button.rs.re{border-radius:9px}
+.cal-g button.today{box-shadow:inset 0 0 0 1.5px var(--brand);font-weight:700}
+.cal-g button[aria-selected="true"]{background:var(--grad,var(--brand));color:#fff;font-weight:700;border-radius:9px}
+.cal-f{display:flex;justify-content:space-between;gap:8px}
+.cal-f .btn{padding:6px 10px;font-size:.78rem}
+.period{display:inline-flex;align-items:center;gap:4px;align-self:flex-start;margin-top:2px;white-space:nowrap;max-width:100%;overflow:hidden;border:1px dashed var(--line);background:none;border-radius:7px;padding:2px 7px;font-size:.74rem;color:var(--ink-2)}
+.period:hover{border-color:var(--brand);color:var(--brand)}
+.period::before{content:"";width:12px;height:12px;flex:none;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E") center/contain no-repeat}
+.period b{font-weight:700} .period span{color:var(--muted)}
+.ess-strip{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;padding:10px 18px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,color-mix(in srgb,var(--warn-soft) 70%,transparent),transparent);flex:none}
+.ess-strip.ok{background:linear-gradient(90deg,color-mix(in srgb,var(--pos-soft) 70%,transparent),transparent)}
+.ess-strip > div{display:flex;flex-direction:column;gap:0;min-width:0}
+.ess-strip b{font-family:var(--f-display);font-weight:600;font-size:1.05rem;font-variant-numeric:tabular-nums}
+.ess-strip b.neg{color:var(--neg)}
+.ess-strip small{font-size:.72rem;color:var(--muted)}
+.ess-strip .btn{margin-left:auto;padding:7px 12px;font-size:.8rem}
+.ess-ok{margin-left:auto;font-size:.8rem;font-weight:600;color:var(--pos)}
+.g-state{font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.g-state.ok{background:var(--pos-soft);color:var(--pos)} .g-state.late{background:var(--warn-soft);color:var(--warn)}
+.g-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;font-size:.78rem;color:var(--muted)}
+.g-date{border:1px dashed var(--line);background:none;border-radius:7px;padding:3px 8px;font-size:.76rem;color:var(--ink-2)}
+.g-date:hover{border-color:var(--brand);color:var(--brand)}
+.g-meta label{display:inline-flex;align-items:center;gap:5px}
+.g-share{width:48px;border:1px solid var(--line);background:var(--surface-2);border-radius:7px;padding:3px 6px;text-align:right;font-variant-numeric:tabular-nums}
+.g-share:focus{border-color:var(--brand);outline:none}
+.g-auto{display:flex;flex-direction:column;gap:6px;padding:10px 14px;border-top:1px solid var(--line);flex:none}
+.g-auto-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.g-auto-row .hint{font-size:.74rem;color:var(--muted)}
+.g-auto-row .btn{padding:5px 10px;font-size:.78rem}
+.switch{display:flex;align-items:center;gap:10px;font-size:.82rem;font-weight:600;color:var(--ink-2);cursor:pointer}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.switch span{flex:none;width:36px;height:20px;border-radius:99px;background:var(--line);position:relative;transition:background .2s}
+.switch span::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+.switch input:checked + span{background:var(--pos)}
+.switch input:checked + span::after{transform:translateX(16px)}
+.switch input:focus-visible + span{outline:2px solid var(--brand);outline-offset:2px}
+.goal-form{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto!important}
+.goal-form #goalName{grid-column:1 / -1}
+@media (max-width:520px){ .row .due{font-size:.68rem;padding:4px 1px} .goal-form{grid-template-columns:1fr 1fr!important} .goal-form #goalName{grid-column:1 / -1} .goal-form .btn{grid-column:1 / -1;justify-content:center} .ess-strip .btn{margin-left:0;width:100%;justify-content:center} }
+@media (prefers-reduced-motion:reduce){ .cal{animation:none} .switch span,.switch span::after{transition:none} }
 </style>
 </head>
 <body>
@@ -711,6 +777,7 @@ body.is-busy .loadbar{opacity:1}
             <label class="cap" for="budget">Budget du mois</label>
             <input id="budget" class="num" inputmode="numeric" autocomplete="off" placeholder="0">
             <span class="d" id="pct">Saisissez un budget</span>
+            <button type="button" class="period" id="periodBtn" title="Changer la fin de la période">Période</button>
           </div>
           <div class="kpi">
             <span class="cap">Prévu</span>
@@ -732,6 +799,7 @@ body.is-busy .loadbar{opacity:1}
 
         <section class="card" aria-label="Dépenses">
           <div class="card-h"><h2>Dépenses</h2><div class="hwrap"><span class="hint" id="rowCount"></span><button type="button" class="sortbtn" id="sortDue" aria-pressed="false">Trier par échéance</button></div></div>
+          <div class="ess-strip" id="essStrip" hidden></div>
           <div class="thead"><span>Statut</span><span>Dépense</span><span class="c" title="Jour du mois où la dépense doit être payée"><span class="lg">Échéance</span><span class="sm">Jour</span></span><span>Montant (Ar)</span><span></span></div>
           <div class="scroll">
             <ul class="rows" id="rows"></ul>
@@ -830,8 +898,13 @@ body.is-busy .loadbar{opacity:1}
         <section class="card goals" aria-label="Objectifs d'épargne">
           <div class="card-h"><h2>Objectifs d'épargne</h2><span class="hint" id="goalFree"></span></div>
           <div class="scroll" id="goalList"></div>
-          <form class="add" id="goalForm" autocomplete="off">
+          <div class="g-auto">
+            <label class="switch"><input type="checkbox" id="autoSplit"><span></span>Répartir automatiquement l'épargne à chaque fin de période</label>
+            <div class="g-auto-row"><span class="hint" id="splitHint"></span><button type="button" class="btn ghost" id="splitNow">Répartir maintenant</button></div>
+          </div>
+          <form class="add goal-form" id="goalForm" autocomplete="off">
             <input id="goalName" placeholder="Nouvel objectif (ex. Maison)" aria-label="Nom de l'objectif" required>
+            <input id="goalDate" type="date" aria-label="Date limite (facultatif)" title="Date limite (facultatif)">
             <input id="goalTarget" class="r" inputmode="numeric" placeholder="Montant visé" aria-label="Montant visé" required>
             <button class="btn" type="submit">Créer</button>
           </form>
@@ -895,6 +968,18 @@ body.is-busy .loadbar{opacity:1}
     </form>
   </div>
 </div>
+<div class="cal-back" id="calBack" hidden></div>
+<div class="cal" id="cal" hidden role="dialog" aria-modal="true" aria-labelledby="calTitle">
+  <div class="cal-top"><b id="calTitle">Choisir une date</b><span id="calSub"></span></div>
+  <div class="cal-h">
+    <button type="button" id="calPrev" aria-label="Mois précédent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <span id="calMonth"></span>
+    <button type="button" id="calNext" aria-label="Mois suivant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+  </div>
+  <div class="cal-w"><span>lun</span><span>mar</span><span>mer</span><span>jeu</span><span>ven</span><span>sam</span><span>dim</span></div>
+  <div class="cal-g" id="calGrid"></div>
+  <div class="cal-f"><button type="button" class="btn ghost" id="calClear">Effacer</button><button type="button" class="btn ghost" id="calToday">Aujourd'hui</button></div>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -908,7 +993,9 @@ body.is-busy .loadbar{opacity:1}
   let budgets = {};      // month -> number
   let expenses = [];     // {id, month, label, amount, paid, createdAt}
   let goal = 0;          // ancien objectif unique (remplacé par les objectifs multiples)
-  let goals = [];        // {id, name, target, saved, createdAt}
+  let goals = [];
+  let periodEnds = {};   // mois -> date de fin de période (AAAA-MM-JJ)
+  let autoSplit = false, lastSplit = '';        // {id, name, target, saved, createdAt}
   let reminders = {on:false, hour:20, email:''};
   let essentials = [];
   let payments = [];     // versements : {id, expenseId, date:'AAAA-MM-JJ', amount}
@@ -927,7 +1014,7 @@ body.is-busy .loadbar{opacity:1}
   function setStatus(text, kind){ const el=$('status'); el.textContent=text; el.classList.toggle('err', kind==='err'); el.classList.toggle('busy', kind==='busy'); }
   // Liaison avec le classeur : la page appelle le script Apps Script (application web) avec une clé d'accès.
   // ▼▼▼ COLLEZ ICI l'URL de votre déploiement Apps Script (elle se termine par /exec) ▼▼▼
-  const API_URL = 'https://script.google.com/macros/s/AKfycbzs8gn56ILuLRsxoN8vBEN2utubXXuvF_B8T5oGDMMOOJBoHOScOB6yi9Hs34j6MkWZ2g/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzJFaKrEW5W6cNqMXcJePqwoWBKw59y4n_WuQhd8Q4cW-IwPt-TkY10JI4U4kw4oJ2vPQ/exec';
   // ▲▲▲ Ne mettez jamais la clé d'accès dans ce fichier : il est public sur GitHub. ▲▲▲
   const CFG_KEY = 'budget-api-key';
   const urlOk = () => /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API_URL);
@@ -949,11 +1036,13 @@ body.is-busy .loadbar{opacity:1}
     if(/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'Le script Apps Script est injoignable. Vérifiez l’URL dans index.html, et que le déploiement autorise « Tout le monde ».';
     return m;
   }
+  let firstApply = true;
   function apply(d){
     if(!d) return;
     expenses = d.expenses || []; budgets = d.budgets || {}; essentials = d.essentials || []; goal = Number(d.goal) || 0;
-    ceilings = d.ceilings || {}; reserve = Number(d.reserve) || 0; payments = d.payments || []; goals = d.goals || []; if(d.reminders) reminders = d.reminders;
+    ceilings = d.ceilings || {}; reserve = Number(d.reserve) || 0; payments = d.payments || []; goals = d.goals || []; if(d.reminders) reminders = d.reminders; periodEnds = d.periodEnds || {}; autoSplit = !!d.autoSplit; lastSplit = d.lastSplit || '';
     if(d.url){ $('sheetUrl').href = d.url; }
+    if(firstApply){ firstApply=false; month = periodKeyFor(todayISO()); setTimeout(()=>{ if(autoSplit && lastSplit!==thisMonth() && completedFree()>=1000) runSplit(false); }, 400); }
     render();
   }
   let busyN = 0;
@@ -992,6 +1081,8 @@ body.is-busy .loadbar{opacity:1}
       add(e){ const it = {...e, id:nid('d')}; return mut(() => { expenses = expenses.concat([it]); }, 'addExpense', [it], it.id); },
       update(id, p){ return mut(() => { expenses = expenses.map(x => x.id===id ? {...x, ...p} : x); }, 'updateExpense', [id, p], id); },
       remove(id){ return mut(() => { expenses = expenses.filter(x => x.id!==id); payments = payments.filter(x => x.expenseId!==id); }, 'deleteExpense', [id]); },
+      setPeriodEnd(m, d){ return mut(() => { const p={...periodEnds}; if(d) p[m]=d; else delete p[m]; periodEnds=p; }, 'setPeriodEnd', [m, d]); },
+      setAutoSplit(on){ return mut(() => { autoSplit=on; }, 'setAutoSplit', [on]); },
       addGoal(g){ const it = {...g, id:nid('g')}; return mut(() => { goals = goals.concat([it]); }, 'addGoal', [it]); },
       updateGoal(id, p){ return mut(() => { goals = goals.map(x => x.id===id ? {...x, ...p} : x); }, 'updateGoal', [id, p]); },
       removeGoal(id){ return mut(() => { goals = goals.filter(x => x.id!==id); }, 'deleteGoal', [id]); },
@@ -1041,9 +1132,10 @@ body.is-busy .loadbar{opacity:1}
     $('sideReste').classList.toggle('neg', reste<0);
     $('sideBar').style.width = (budget ? Math.min(100,total/budget*100) : 0)+'%';
     $('sideBar').classList.toggle('over', budget>0 && total>budget);
-    { const n=new Date(), cm=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
-      if(cm===month){ const last=new Date(n.getFullYear(), n.getMonth()+1, 0).getDate(), left=last-n.getDate(); $('sideDays').textContent = left ? plural(left,'jour')+' avant la fin du mois' : 'Dernier jour du mois'; }
-      else $('sideDays').textContent = month<cm ? 'Mois terminé' : 'Mois à venir'; }
+    { const P=periodOf(month), D=daysInfo(month), t=todayISO();
+      if(t>=P.start && t<=P.end) $('sideDays').textContent = D.left>1 ? plural(D.left-1,'jour')+' avant la fin de période ('+fmtShort(P.end)+')' : 'Dernier jour de la période';
+      else $('sideDays').textContent = t>P.end ? 'Période terminée le '+fmtShort(P.end) : 'Période du '+fmtShort(P.start)+' au '+fmtShort(P.end);
+      $('periodBtn').innerHTML = fmtShort(P.start)+' → <b>'+fmtShort(P.end)+'</b>'; $('periodBtn').title = 'Période du '+fmtLong(P.start)+' au '+fmtLong(P.end)+' : cliquez pour changer la fin'; }
     $('rowCount').innerHTML = rows.length ? plural(rows.length,'ligne')+' · '+rows.filter(settled).length+' réglée'+(rows.filter(settled).length>1?'s':'')+(budget ? ' · disponible <span class="avail'+(availNow<=0?' neg':'')+'">'+fmt(Math.max(0,availNow))+' Ar</span>' : '') : '';
     tween($('footTotal'), total, ' Ar');
     $('paidSum').textContent = fmt(paid) + ' Ar';
@@ -1057,7 +1149,7 @@ body.is-busy .loadbar{opacity:1}
     // rows — keep focus on the field being edited
     const focused = document.activeElement && document.activeElement.closest('.row') ? document.activeElement.dataset.key : null;
     const ul = $('rows'); ul.innerHTML='';
-    if(sortDue) rows.sort((a,b)=>(settled(a)-settled(b)) || ((a.due||99)-(b.due||99)) || ((a.createdAt||0)-(b.createdAt||0)));
+    if(sortDue) rows.sort((a,b)=>(settled(a)-settled(b)) || ((dueDate(a,month)||'9999').localeCompare(dueDate(b,month)||'9999')) || ((a.createdAt||0)-(b.createdAt||0)));
     $('sortDue').setAttribute('aria-pressed', String(sortDue));
     rows.forEach(e=>{
       const ds = dueState(e, month), capV = ceilings[norm(e.label)], overCap = capV && capUse(e.label, month) > capV;
@@ -1065,13 +1157,12 @@ body.is-busy .loadbar{opacity:1}
       const isEss = !!findEss(e.label);
       li.innerHTML =
         pill(e, availNow)+        '<input type="text" class="lab" id="lab-'+e.id+'" data-key="lab-'+e.id+'" aria-label="Dépense">'+
-        '<input type="text" class="due" id="due-'+e.id+'" data-key="due-'+e.id+'" inputmode="numeric" maxlength="2" placeholder="—" aria-label="Jour d\u2019échéance" title="'+(ds==='late'?'En retard':ds==='soon'?'À payer bientôt':'Jour du mois')+'">'+
+        '<button type="button" class="due" data-key="due-'+e.id+'" aria-label="Échéance" title="'+(ds==='late'?'En retard':ds==='soon'?'À payer bientôt':'Choisir la date d\u2019échéance')+'">'+(dueDate(e,month)?fmtShort(dueDate(e,month)):'—')+'</button>'+
         '<input type="text" class="amt" id="amt-'+e.id+'" data-key="amt-'+e.id+'" inputmode="numeric" aria-label="Montant"'+(overCap?' title="Plafond de '+fmt(capV)+' Ar dépassé"':'')+'>'+
         '<span class="acts"><button type="button" class="star" aria-pressed="'+isEss+'" title="'+(isEss?'Retirer des essentielles':'Ajouter aux essentielles')+'" aria-label="Dépense essentielle">'+(isEss?'★':'☆')+'</button>'+
         '<button type="button" class="del" aria-label="Supprimer">×</button></span>';
       li.querySelector('.lab').value = e.label || '';
       li.querySelector('.amt').value = fmt(e.amount);
-      li.querySelector('.due').value = e.due ? e.due : '';
       { const a=Number(e.amount)||0, sp=spentOf(e); if(sp>0){ const pr=document.createElement('i'); pr.className='prog '+stateOf(e); pr.style.width=Math.min(100, a? sp/a*100 : 100)+'%'; li.appendChild(pr); } }
       ul.appendChild(li);
     });
@@ -1098,6 +1189,15 @@ body.is-busy .loadbar{opacity:1}
     });
     drawRing(sorted, budget, total, col);
 
+    { const er=rows.filter(e=>isEss(e)), strip=$('essStrip');
+      if(!er.length){ strip.hidden=true; }
+      else {
+        const tot=er.reduce((s,e)=>s+(Number(e.amount)||0),0), left=er.reduce((s,e)=>s+leftOf(e),0), done=er.filter(settled).length, margin=budget-reserve-tot;
+        strip.hidden=false; strip.className='ess-strip'+(left===0?' ok':'');
+        strip.innerHTML='<div><span class="cap">Essentielles</span><b>'+fmt(tot)+' Ar</b><small>'+done+' sur '+er.length+' réglée'+(done>1?'s':'')+'</small></div>'+
+          '<div><span class="cap">Vraie marge</span><b class="'+(margin<0?'neg':'')+'">'+(budget?fmt(margin)+' Ar':'—')+'</b><small>budget'+(reserve>0?' − épargne protégée':'')+' − essentielles</small></div>'+
+          (left>0 ? '<button type="button" class="btn" id="payEss">Régler les essentielles ('+fmt(left)+' Ar)</button>' : '<span class="ess-ok">Essentielles réglées</span>');
+      } }
     renderSavings();
     renderChart();
     renderCaps();
@@ -1112,10 +1212,10 @@ body.is-busy .loadbar{opacity:1}
     essSorted.forEach(e=>{
       const li=document.createElement('li'); li.className='row'+(pendingIds.has(e.id)?' saving':''); li.dataset.id=e.id;
       li.innerHTML='<input type="text" class="lab" id="elab-'+e.id+'" data-key="elab-'+e.id+'" aria-label="Dépense essentielle">'+
-        '<input type="text" class="due" id="edue-'+e.id+'" data-key="edue-'+e.id+'" inputmode="numeric" maxlength="2" placeholder="—" aria-label="Jour d\u2019échéance">'+
+        '<button type="button" class="due" data-key="edue-'+e.id+'" aria-label="Jour d\u2019échéance" title="Jour du mois">'+(dayOf(e)?'le '+dayOf(e):'—')+'</button>'+
         '<input type="text" class="amt" id="eamt-'+e.id+'" data-key="eamt-'+e.id+'" inputmode="numeric" aria-label="Montant habituel">'+
         '<button type="button" class="del" aria-label="Supprimer">×</button>';
-      li.querySelector('.lab').value=e.label||''; li.querySelector('.amt').value=fmt(e.amount); li.querySelector('.due').value=e.due?e.due:'';
+      li.querySelector('.lab').value=e.label||''; li.querySelector('.amt').value=fmt(e.amount);
       eul.appendChild(li);
     });
     if(eFocused){ const el=document.querySelector('[data-key="'+eFocused+'"]'); if(el) el.focus(); }
@@ -1197,33 +1297,50 @@ body.is-busy .loadbar{opacity:1}
   function stateOf(e){ const a=Number(e.amount)||0, sp=spentOf(e); if(a>0 && sp>a) return 'over'; if(sp>0 && sp>=a) return 'done'; if(sp>0) return 'part'; return 'todo'; }
   const settled = e => { const st=stateOf(e); return st==='done' || st==='over'; };
   const todayISO = () => { const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0'); };
+  /* ---------- Budget periods: a "month" can end on any date ---------- */
+  const isoOf = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const parseISO = iso => { const [y,m,d]=iso.split('-').map(Number); return new Date(y,m-1,d); };
+  const addDays = (iso,k) => { const d=parseISO(iso); d.setDate(d.getDate()+k); return isoOf(d); };
+  const diffDays = (a,b) => Math.round((parseISO(b)-parseISO(a))/864e5);
+  const lastDayOf = m => { const [y,mo]=m.split('-').map(Number); return m+'-'+String(new Date(y,mo,0).getDate()).padStart(2,'0'); };
+  const fmtShort = iso => new Intl.DateTimeFormat('fr-FR',{day:'numeric', month:'short'}).format(parseISO(iso));
+  const fmtLong = iso => new Intl.DateTimeFormat('fr-FR',{day:'numeric', month:'long', year:'numeric'}).format(parseISO(iso));
+  function periodOf(m){ const prev=shiftMonth(m,-1); return { start: periodEnds[prev] ? addDays(periodEnds[prev],1) : m+'-01', end: periodEnds[m] || lastDayOf(m) }; }
+  function periodKeyFor(iso){ const m0=iso.slice(0,7); for(const m of [m0, shiftMonth(m0,-1), shiftMonth(m0,1)]){ const P=periodOf(m); if(iso>=P.start && iso<=P.end) return m; } return m0; }
   function daysInfo(m){
-    const [y,mo]=m.split('-').map(Number), last=new Date(y,mo,0).getDate(), cm=thisMonth();
-    if(m===cm){ const d=new Date().getDate(); return {last, today:d, left:last-d+1}; }
-    return m<cm ? {last, today:last, left:0} : {last, today:0, left:last};
+    const P=periodOf(m), t=todayISO(), total=diffDays(P.start,P.end)+1;
+    if(t>=P.start && t<=P.end) return {last:total, today:diffDays(P.start,t)+1, left:diffDays(t,P.end)+1};
+    return t>P.end ? {last:total, today:total, left:0} : {last:total, today:0, left:total};
+  }
+  const dayOf = e => { const d=e && e.due; if(!d) return 0; return typeof d==='string' && d.length===10 ? Number(d.slice(8,10)) : (Number(d)||0); };
+  // Due date of a line in period m (a date, or a day of the month mapped into the period)
+  function dueDate(e, m){
+    const d=e && e.due; if(!d) return '';
+    if(typeof d==='string' && /^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+    const day=Number(d); if(!(day>=1 && day<=31)) return '';
+    const P=periodOf(m||month); let x=P.start;
+    for(let i=0; i<40 && x<=P.end; i++){ if(Number(x.slice(8,10))===day) return x; x=addDays(x,1); }
+    return P.end;
   }
   // Spending pace of a line in the current month: Ar per day since its first payment
   function paceOf(e, m){
     const ps=paysOf(e.id); if(ps.length<2 || m!==thisMonth()) return null;
-    const first=Number(ps[0].date.slice(8,10))||1, D=daysInfo(m), days=Math.max(1, D.today-first+1);
+    const P=periodOf(m), first=Math.max(1, diffDays(P.start, ps[0].date)+1), D=daysInfo(m), days=Math.max(1, D.today-first+1);
     const rate=spentOf(e)/days, projected=spentOf(e)+rate*(D.left-1);
     return {rate, projected, daysLeft:D.left};
   }
 
   /* ---------- Due days ---------- */
-  const thisMonth = () => { const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0'); };
-  // 'late' | 'soon' | '' for an unpaid line of month m
+  const thisMonth = () => periodKeyFor(todayISO());
+  // 'late' | 'soon' | '' for an unpaid line of period m
   function dueState(e, m){
-    const d = Number(e.due)||0; if(!d || settled(e)) return '';
-    const cm = thisMonth();
-    if(m < cm) return 'late';
-    if(m > cm) return '';
-    const today = new Date().getDate();
-    if(d < today) return 'late';
-    if(d - today <= 3) return 'soon';
+    const dd=dueDate(e, m); if(!dd || settled(e)) return '';
+    const t=todayISO();
+    if(dd < t) return 'late';
+    if(diffDays(t, dd) <= 3) return 'soon';
     return '';
   }
-  const dueLabel = d => d ? 'le '+d : '';
+  const dueLabel = (e, m) => { const d=dueDate(e, m||month); return d ? 'le '+fmtShort(d) : ''; };
   // Ceiling use for one label in month m
   function capUse(label, m){ const k=norm(label); return monthRows(m).filter(e=>norm(e.label)===k).reduce((s,e)=>s+(Number(e.amount)||0),0); }
 
@@ -1336,6 +1453,62 @@ body.is-busy .loadbar{opacity:1}
   // "Tout payer" keeps the old one-tap behaviour
   const tryPay = e => tryPayment(e, leftOf(e), todayISO(), {full:true});
 
+  /* ---------- Calendar picker ---------- */
+  let calOpt = null, calView = '';
+  function openCal(o){
+    calOpt = o; calView = o.view || (o.value || todayISO()).slice(0,7);
+    $('calTitle').textContent = o.title || 'Choisir une date'; $('calSub').textContent = o.sub || '';
+    $('calClear').textContent = o.clearLabel || 'Effacer'; $('calClear').hidden = o.noClear;
+    drawCal(); $('cal').hidden=false; $('calBack').hidden=false; placeCal(o.anchor);
+    setTimeout(()=>{ const f=$('calGrid').querySelector('[aria-selected="true"]')||$('calGrid').querySelector('.today')||$('calGrid').querySelector('button:not(.out)'); f && f.focus(); },20);
+  }
+  function closeCal(){ $('cal').hidden=true; $('calBack').hidden=true; const a=calOpt&&calOpt.anchor; calOpt=null; a && a.focus && a.focus(); }
+  function placeCal(anchor){
+    const c=$('cal'); c.style.left=''; c.style.top=''; c.classList.remove('sheet');
+    if(!anchor || innerWidth<560){ c.classList.add('sheet'); return; }
+    const r=anchor.getBoundingClientRect(), w=c.offsetWidth, h=c.offsetHeight;
+    let left=Math.min(Math.max(12, r.left + r.width/2 - w/2), innerWidth-w-12), top=r.bottom+8;
+    if(top+h > innerHeight-12) top=Math.max(12, r.top-h-8);
+    c.style.left=left+'px'; c.style.top=top+'px';
+  }
+  function drawCal(){
+    const [y,m]=calView.split('-').map(Number), first=new Date(y,m-1,1), off=(first.getDay()+6)%7, t=todayISO(), o=calOpt||{};
+    $('calMonth').textContent=new Intl.DateTimeFormat('fr-FR',{month:'long', year:'numeric'}).format(first);
+    let h='';
+    for(let i=0;i<42;i++){
+      const d=new Date(y,m-1,1-off+i), iso=isoOf(d), out=d.getMonth()!==m-1;
+      const inR=o.range && iso>=o.range.start && iso<=o.range.end;
+      const cls=[out?'out':'', iso===t?'today':'', inR?'inr':'', o.range&&iso===o.range.start?'rs':'', o.range&&iso===o.range.end?'re':''].filter(Boolean).join(' ');
+      h+='<button type="button" data-d="'+iso+'" class="'+cls+'" aria-selected="'+(iso===o.value)+'" aria-label="'+fmtLong(iso)+'">'+d.getDate()+'</button>';
+      if(i===34 && new Date(y,m-1,1-off+35).getMonth()!==m-1) break;
+    }
+    $('calGrid').innerHTML=h;
+  }
+  $('calPrev').addEventListener('click',()=>{ calView=shiftMonth(calView,-1); drawCal(); });
+  $('calNext').addEventListener('click',()=>{ calView=shiftMonth(calView,1); drawCal(); });
+  $('calGrid').addEventListener('click',ev=>{ const b=ev.target.closest('button[data-d]'); if(!b||!calOpt) return; const fn=calOpt.onPick; closeCal(); fn && fn(b.dataset.d); });
+  $('calGrid').addEventListener('keydown',ev=>{
+    const b=ev.target.closest('button[data-d]'); if(!b) return; const k={ArrowLeft:-1,ArrowRight:1,ArrowUp:-7,ArrowDown:7}[ev.key]; if(!k) return;
+    ev.preventDefault(); const iso=addDays(b.dataset.d,k); if(iso.slice(0,7)!==calView){ calView=iso.slice(0,7); drawCal(); }
+    const n=$('calGrid').querySelector('[data-d="'+iso+'"]'); n && n.focus();
+  });
+  $('calClear').addEventListener('click',()=>{ const fn=calOpt&&calOpt.onPick; closeCal(); fn && fn(''); });
+  $('calToday').addEventListener('click',()=>{ calView=todayISO().slice(0,7); drawCal(); const n=$('calGrid').querySelector('.today'); n && n.focus(); });
+  $('calBack').addEventListener('click', closeCal);
+  document.addEventListener('keydown', ev=>{ if(ev.key==='Escape' && !$('cal').hidden){ ev.stopPropagation(); closeCal(); } }, true);
+  addEventListener('resize', ()=>{ if(!$('cal').hidden && calOpt) placeCal(calOpt.anchor); });
+
+  // Period end: the budget "month" ends when the company pays, not always on the last day
+  $('periodBtn').addEventListener('click', ()=>{
+    const P=periodOf(month);
+    openCal({ anchor:$('periodBtn'), value:P.end, view:P.end.slice(0,7), range:P, title:'Fin de la période', sub:'Du '+fmtShort(P.start)+' au jour choisi. La période suivante commence le lendemain.', clearLabel:'Fin du mois',
+      onPick: iso => {
+        if(iso && iso < P.start) return toast('La fin doit être après le début ('+fmtShort(P.start)+')');
+        if(iso && diffDays(P.start, iso) > 62) return toast('Une période ne peut pas dépasser deux mois');
+        store.setPeriodEnd(month, iso && iso!==lastDayOf(month) ? iso : '').then(()=>toast('Période : '+fmtShort(periodOf(month).start)+' → '+fmtShort(periodOf(month).end))).catch(fail);
+      } });
+  });
+
   /* ---------- Quick add: note a payment in two taps ---------- */
   let qkSel = null, qkAuto = true;
   function openQuick(){
@@ -1355,7 +1528,7 @@ body.is-busy .loadbar{opacity:1}
       box.appendChild(b);
     });
     qkSel=null; qkAuto=true; $('qkAmt').value='';
-    const t=todayISO(); $('qkDate').value = t.slice(0,7)===month ? t : month+'-01';
+    { const P=periodOf(month), t=todayISO(); $('qkDate').min=P.start; $('qkDate').max=P.end; $('qkDate').value = t>=P.start && t<=P.end ? t : (t>P.end ? P.end : P.start); }
     $('quick').hidden=false; setTimeout(()=>$('qkAmt').focus(), 40);
   }
   function closeQuick(){ $('quick').hidden=true; }
@@ -1379,6 +1552,24 @@ body.is-busy .loadbar{opacity:1}
   });
   document.addEventListener('keydown', ev=>{ if(ev.key==='Escape' && !$('quick').hidden && $('dlg').hidden) closeQuick(); });
 
+  /* ---------- Pay all essentials first ---------- */
+  function payEssentials(){
+    const list=monthRows(month).filter(e=>isEss(e) && leftOf(e)>0).sort((a,b)=>(dueDate(a,month)||'9999').localeCompare(dueDate(b,month)||'9999'));
+    if(!list.length) return;
+    const M=money(month), need=list.reduce((s,e)=>s+leftOf(e),0), t=todayISO(), P=periodOf(month), date= t>=P.start&&t<=P.end ? t : P.start;
+    const payAll = arr => { let pr=Promise.resolve(); arr.forEach(e=>{ pr=pr.then(()=>{ const amt=leftOf(e), whole=!paysOf(e.id).length && amt===(Number(e.amount)||0); return whole ? store.update(e.id,{paid:true}) : store.addPayment({expenseId:e.id, date, amount:amt}); }); });
+      return pr.then(()=>toast(plural(arr.length,'essentielle')+' réglée'+(arr.length>1?'s':'')+' · vraie marge '+fmt(M.b-reserve-monthRows(month).filter(isEss).reduce((s,e)=>s+(Number(e.amount)||0),0))+' Ar')).catch(fail); };
+    if(!M.b) return tryPayment(list[0], leftOf(list[0]), date, {full:true});
+    if(need <= M.avail) return payAll(list);
+    const picked=[]; let sum=0; list.forEach(e=>{ if(sum+leftOf(e) <= M.avail){ picked.push(e); sum+=leftOf(e); } });
+    const opts=[];
+    if(picked.length) opts.push({ label:'Régler '+picked.map(e=>e.label).join(', '), detail:fmt(sum)+' Ar, dans l’ordre des échéances', cta:'Régler', primary:true, fn:()=>payAll(picked) });
+    opts.push({ label:'Augmenter le budget de '+fmt(need-M.avail)+' Ar', detail:'Puis régler toutes les essentielles', cta:'Augmenter', fn:()=>store.setBudget(month, M.b+need-M.avail).then(()=>payAll(list)).catch(fail) });
+    openDialog({ title:'Pas assez pour toutes les essentielles', text:'Il reste '+fmt(Math.max(0,M.avail))+' Ar disponibles, et les essentielles demandent '+fmt(need)+' Ar.',
+      figs:[['Disponible',fmt(Math.max(0,M.avail))+' Ar','pos'],['Essentielles',fmt(need)+' Ar'],['Il manque',fmt(need-M.avail)+' Ar','neg']], opts });
+  }
+  $('essStrip').addEventListener('click', ev=>{ if(ev.target.closest('#payEss')) payEssentials(); });
+
   /* ---------- Line panel: payments of one envelope ---------- */
   let panelId = null;
   function openLine(e){
@@ -1399,8 +1590,7 @@ body.is-busy .loadbar{opacity:1}
     const last = ps.length ? Number(ps[ps.length-1].amount)||0 : 0;
     if(document.activeElement !== $('lpAmt')) $('lpAmt').value = fmt(last || Math.min(a-sp>0 ? a-sp : a, a));
     const [y,mo]=month.split('-'), lastDay=new Date(+y, +mo, 0).getDate();
-    $('lpDate').min = month+'-01'; $('lpDate').max = month+'-'+String(lastDay).padStart(2,'0');
-    const t=todayISO(); $('lpDate').value = t.slice(0,7)===month ? t : month+'-01';
+    { const P=periodOf(month), t=todayISO(); $('lpDate').min=P.start; $('lpDate').max=P.end; $('lpDate').value = t>=P.start && t<=P.end ? t : (t>P.end ? P.end : P.start); }
     $('lpAll').hidden = !(a-sp>0); $('lpAll').textContent = 'Tout régler ('+fmt(Math.max(0,a-sp))+' Ar)';
     const ul=$('lpList'); ul.innerHTML='';
     if(!ps.length && x.paid){ ul.innerHTML='<li class="lp-one"><span>Réglée en une fois</span><b>'+fmt(a)+' Ar</b><button type="button" class="btn ghost" data-unpay="1">Annuler le paiement</button></li>'; }
@@ -1456,7 +1646,7 @@ body.is-busy .loadbar{opacity:1}
     if(!miss.length){ toast('Toutes les essentielles sont déjà dans ce mois'); return; }
     try{
       let t=Date.now();
-      await Promise.all(miss.map(e=>store.add({month,label:norm(e.label),amount:Number(e.amount)||0,paid:false,createdAt:t++,due:Number(e.due)||0})));
+      await Promise.all(miss.map(e=>store.add({month,label:norm(e.label),amount:Number(e.amount)||0,paid:false,createdAt:t++,due:dueDate({due:dayOf(e)},month)})));
       toast(miss.length+' dépense'+(miss.length>1?'s':'')+' essentielle'+(miss.length>1?'s':'')+' importée'+(miss.length>1?'s':''));
     }catch(e){ fail(e); }
   }
@@ -1524,14 +1714,17 @@ body.is-busy .loadbar{opacity:1}
 
     if(cur.rows.length && !cur.rows.some(e=>isImp(e.label))) out.push({lvl:'info', t:'Pas d\u2019enveloppe IMPRÉVUS ce mois-ci', x:'Une petite réserve pour les imprévus (par exemple 20 000 Ar) évite qu\u2019une dépense inattendue fasse dépasser vos autres enveloppes.', act:'imprevus', actLbl:'Créer IMPRÉVUS (20 000 Ar)'});
 
+    { const D=daysInfo(month), er=cur.rows.filter(e=>isEss(e)), left=er.reduce((s,e)=>s+leftOf(e),0);
+      if(month===thisMonth() && left>0 && D.today<=5) out.push({lvl:'warn', t:'Début de période : réglez d’abord vos essentielles', x:fmt(left)+' Ar pour '+er.filter(e=>leftOf(e)>0).map(e=>e.label).join(', ')+'. Ce qui reste ensuite ('+fmt(cur.b-reserve-er.reduce((s,e)=>s+(Number(e.amount)||0),0))+' Ar) est votre vraie marge.', act:'payess', actLbl:'Régler les essentielles'}); }
+
     // 0b. due days: late and upcoming
     {
-      const late = cur.rows.filter(e=>dueState(e, month)==='late').sort((a,b)=>(a.due||0)-(b.due||0));
-      const soon = cur.rows.filter(e=>dueState(e, month)==='soon').sort((a,b)=>(a.due||0)-(b.due||0));
-      if(late.length) out.push({lvl:'alert', t:plural(late.length,'dépense')+' en retard', x:late.map(e=>e.label+' (échéance '+dueLabel(e.due)+', '+fmt(e.amount)+' Ar)').join(', ')+'.'});
-      if(soon.length) out.push({lvl:'warn', t:'À payer dans les 3 prochains jours', x:soon.map(e=>e.label+' '+dueLabel(e.due)+' ('+fmt(e.amount)+' Ar)').join(', ')+'.'});
-      const next = cur.rows.filter(e=>!settled(e) && e.due && !dueState(e, month)).sort((a,b)=>a.due-b.due).slice(0,3);
-      if(!late.length && !soon.length && next.length && month===thisMonth()) out.push({lvl:'info', t:'Prochaines échéances', x:next.map(e=>e.label+' '+dueLabel(e.due)).join(', ')+'.'});
+      const late = cur.rows.filter(e=>dueState(e, month)==='late').sort((a,b)=>dueDate(a,month).localeCompare(dueDate(b,month)));
+      const soon = cur.rows.filter(e=>dueState(e, month)==='soon').sort((a,b)=>dueDate(a,month).localeCompare(dueDate(b,month)));
+      if(late.length) out.push({lvl:'alert', t:plural(late.length,'dépense')+' en retard', x:late.map(e=>e.label+' (échéance '+dueLabel(e)+', '+fmt(e.amount)+' Ar)').join(', ')+'.'});
+      if(soon.length) out.push({lvl:'warn', t:'À payer dans les 3 prochains jours', x:soon.map(e=>e.label+' '+dueLabel(e)+' ('+fmt(e.amount)+' Ar)').join(', ')+'.'});
+      const next = cur.rows.filter(e=>!settled(e) && dueDate(e,month) && !dueState(e, month)).sort((a,b)=>dueDate(a,month).localeCompare(dueDate(b,month))).slice(0,3);
+      if(!late.length && !soon.length && next.length && month===thisMonth()) out.push({lvl:'info', t:'Prochaines échéances', x:next.map(e=>e.label+' '+dueLabel(e)).join(', ')+'.'});
     }
     // 0c. ceilings and unusual increases
     Object.keys(ceilings).forEach(l=>{
@@ -1607,6 +1800,8 @@ body.is-busy .loadbar{opacity:1}
       const avgM = all.length ? cum/all.length : 0;
       goals.forEach(g=>{
         const need=(Number(g.target)||0)-(Number(g.saved)||0); if(need<=0) return;
+        const pl=goalPlan(g);
+        if(pl){ out.push({lvl: pl.cls==='late'?'warn':'info', t:g.name+' : '+fmt(pl.per||need)+' Ar à mettre de côté par mois', x:'Pour atteindre '+fmt(g.target)+' Ar avant le '+fmtLong(g.deadline)+' (il manque '+fmt(need)+' Ar).'+(pl.state?' '+pl.state+'.':'')}); return; }
         out.push({lvl:'info', t:g.name+' : il manque '+fmt(need)+' Ar', x: avgM>0 ? 'Avec votre épargne moyenne ('+fmt(avgM)+' Ar par mois), comptez environ '+Math.ceil(need/avgM)+' mois.' : 'Mettez de côté chaque mois pour avancer.'});
       });
       if(goals.length && free >= 1000) out.push({lvl:'info', t:fmt(free)+' Ar épargnés non répartis', x:'Choisissez à quel objectif les attribuer.', act:'goals', actLbl:'Répartir'});
@@ -1720,16 +1915,47 @@ body.is-busy .loadbar{opacity:1}
     goals.slice().sort((a,b)=>(a.createdAt||0)-(b.createdAt||0)).forEach(g=>{
       const t=Number(g.target)||0, sv=Number(g.saved)||0, pct=t? Math.min(100, sv/t*100) : 0, need=Math.max(0,t-sv);
       const el=document.createElement('div'); el.className='goal'+(sv>=t&&t>0?' done':''); el.dataset.id=g.id;
-      el.innerHTML='<div class="g-top"><b></b><span class="g-pct"></span><button type="button" class="del" aria-label="Supprimer l’objectif">×</button></div><div class="g-bar"><i></i></div><div class="g-sub"></div><form class="g-add"><input inputmode="numeric" placeholder="Montant à ajouter" aria-label="Montant à mettre de côté"><button class="btn" type="submit">Ajouter</button><button class="btn ghost g-all" type="button">Tout le non réparti</button></form>';
+      el.innerHTML='<div class="g-top"><b></b><span class="g-state"></span><span class="g-pct"></span><button type="button" class="del" aria-label="Supprimer l\u2019objectif">×</button></div><div class="g-bar"><i></i></div><div class="g-sub"></div><div class="g-meta"><button type="button" class="g-date"></button><label>Part <input class="g-share" inputmode="numeric" maxlength="3" aria-label="Part de la répartition automatique"> %</label></div><form class="g-add"><input inputmode="numeric" placeholder="Montant à ajouter" aria-label="Montant à mettre de côté"><button class="btn" type="submit">Ajouter</button><button class="btn ghost g-all" type="button">Tout le non réparti</button></form>';
       el.querySelector('b').textContent=g.name;
       el.querySelector('.g-pct').textContent=Math.floor(pct)+' %';
       el.querySelector('.g-bar i').style.width=pct+'%';
-      el.querySelector('.g-sub').textContent = fmt(sv)+' / '+fmt(t)+' Ar'+(need>0 ? ' · il manque '+fmt(need)+' Ar'+(avgM>0?' · environ '+Math.ceil(need/avgM)+' mois':'') : ' · objectif atteint');
+      const plan = goalPlan(g);
+      el.querySelector('.g-sub').textContent = fmt(sv)+' / '+fmt(t)+' Ar'+(need>0 ? (plan ? ' · '+plan.text : ' · il manque '+fmt(need)+' Ar'+(avgM>0?' · environ '+Math.ceil(need/avgM)+' mois':'')) : ' · objectif atteint');
+      const stE=el.querySelector('.g-state'); if(plan && plan.state){ stE.textContent=plan.state; stE.className='g-state '+plan.cls; } else stE.remove();
+      el.querySelector('.g-date').textContent = g.deadline ? 'Avant le '+fmtShort(g.deadline)+' '+g.deadline.slice(0,4) : 'Ajouter une date limite';
+      el.querySelector('.g-share').value = g.share ? g.share : ''; el.querySelector('.g-share').dataset.key='gs-'+g.id;
       const inp=el.querySelector('input'); inp.dataset.key='g-'+g.id;
       const allB=el.querySelector('.g-all'); allB.hidden = goalFree < 1000 || need<=0; allB.textContent = need>0 && goalFree>need ? 'Compléter ('+fmt(need)+' Ar)' : 'Tout le non réparti ('+fmt(Math.max(0,goalFree))+' Ar)';
       box.appendChild(el);
     });
     if(fk){ const e=box.querySelector('[data-key="'+fk+'"]'); if(e) e.focus(); }
+    const shares=goals.filter(g=>(Number(g.target)||0)>(Number(g.saved)||0)).reduce((s,g)=>s+(Number(g.share)||0),0), cf=completedFree();
+    $('autoSplit').checked = autoSplit;
+    $('splitNow').textContent = 'Répartir maintenant'+(cf>=1000?' ('+fmt(Math.floor(cf/100)*100)+' Ar)':'');
+    $('splitNow').disabled = !goals.length;
+    $('splitHint').textContent = !goals.length ? '' : shares>0 ? 'Selon les parts : '+shares+' % au total'+(shares!==100?' (les parts sont ramenées à 100 %)':'')+'.' : goals.some(g=>g.deadline) ? 'Sans parts, selon les dates limites (le plus urgent reçoit plus).' : 'Sans parts ni dates, à parts égales.';
+  }
+  // Monthly effort for a goal with a deadline, and whether it is on track
+  function goalPlan(g){
+    if(!g.deadline) return null;
+    const t=todayISO(), need=Math.max(0,(Number(g.target)||0)-(Number(g.saved)||0));
+    if(need<=0) return null;
+    const days=diffDays(t, g.deadline);
+    if(days<0) return {text:'date limite dépassée · il manque '+fmt(need)+' Ar', state:'En retard', cls:'late'};
+    const months=Math.max(1, Math.ceil(days/30.44)), per=Math.ceil(need/months/100)*100;
+    let state='', cls='';
+    if(g.createdAt){ const start=isoOf(new Date(Number(g.createdAt))), span=Math.max(1,diffDays(start,g.deadline)), done=Math.min(1,Math.max(0,diffDays(start,t)/span)), expected=(Number(g.target)||0)*done;
+      if((Number(g.saved)||0) >= expected) { state='Dans les temps'; cls='ok'; } else { state='En retard de '+fmt(expected-(Number(g.saved)||0))+' Ar'; cls='late'; } }
+    return {text:fmt(per)+' Ar par mois pendant '+plural(months,'mois').replace('moiss','mois')+' (il manque '+fmt(need)+' Ar)', state, cls, per};
+  }
+  // Savings of finished periods not yet placed in a goal (what the automatic split distributes)
+  function completedFree(){
+    const key=thisMonth(); let cum=0;
+    trackedMonths().filter(m=>m<key).forEach(m=>{ const S=stats(m); cum+=S.r; });
+    return cum - goals.reduce((s,g)=>s+(Number(g.saved)||0),0);
+  }
+  function runSplit(force){
+    return call('splitSavings', thisMonth(), !!force).then(d=>{ apply(d); const mv=Number(d.splitMoved)||0; if(mv) toast(fmt(mv)+' Ar répartis automatiquement dans vos objectifs'); else if(force) toast('Rien à répartir : l\u2019épargne des périodes terminées est déjà placée'); }).catch(fail);
   }
   function allocate(g, v){
     const sv=Number(g.saved)||0;
@@ -1803,9 +2029,18 @@ body.is-busy .loadbar{opacity:1}
     else { del.classList.add('confirm'); del.textContent='Suppr.?'; setTimeout(()=>{ if(del.isConnected){ del.classList.remove('confirm'); del.textContent='×'; } },3000); }
   });
   document.addEventListener('keydown', ev=>{ if(ev.key==='Escape' && !$('linePanel').hidden && $('dlg').hidden) closeLine(); });
-  $('goalForm').addEventListener('submit', ev=>{ ev.preventDefault(); const n=$('goalName').value.trim(), t=parseAmt($('goalTarget').value); if(!n||!t) return; store.addGoal({name:n, target:t, saved:0, createdAt:Date.now()}).then(()=>toast('Objectif « '+n+' » créé')).catch(fail); $('goalName').value=''; $('goalTarget').value=''; });
+  $('goalForm').addEventListener('submit', ev=>{ ev.preventDefault(); const n=$('goalName').value.trim(), t=parseAmt($('goalTarget').value); if(!n||!t) return; store.addGoal({name:n, target:t, saved:0, createdAt:Date.now(), deadline:$('goalDate').value||'', share:0}).then(()=>toast('Objectif « '+n+' » créé')).catch(fail); $('goalName').value=''; $('goalTarget').value=''; $('goalDate').value=''; });
+  $('goalList').addEventListener('change', ev=>{ const inp=ev.target.closest('.g-share'); if(!inp) return; const id=inp.closest('.goal').dataset.id; const v=Math.min(100, Math.max(0, parseAmt(inp.value))); store.updateGoal(id,{share:v}).then(()=>toast('Part enregistrée : '+v+' %')).catch(fail); });
+  $('autoSplit').addEventListener('change', ev=>{ const on=ev.target.checked; store.setAutoSplit(on).then(()=>{ toast(on ? 'Répartition automatique activée' : 'Répartition automatique désactivée'); if(on && completedFree()>=1000 && lastSplit!==thisMonth()) runSplit(false); }).catch(fail); });
+  $('splitNow').addEventListener('click', ()=>runSplit(true));
   $('goalList').addEventListener('submit', ev=>{ ev.preventDefault(); const el=ev.target.closest('.goal'); if(!el) return; const g=goals.find(x=>x.id===el.dataset.id); const raw=ev.target.querySelector('input').value.trim(); const v=(raw.startsWith('-')?-1:1)*Math.abs(parseAmt(raw)); if(g && v) allocate(g, v); ev.target.querySelector('input').value=''; });
-  $('goalList').addEventListener('click', ev=>{ const ab=ev.target.closest('.g-all'); if(ab){ const g=goals.find(x=>x.id===ab.closest('.goal').dataset.id); if(g){ const need=Math.max(0,(Number(g.target)||0)-(Number(g.saved)||0)); allocate(g, Math.min(need, Math.max(0,goalFree))); } return; }
+  $('goalList').addEventListener('click', ev=>{
+    const gd=ev.target.closest('.g-date');
+    if(gd){ const id=gd.closest('.goal').dataset.id, g=goals.find(x=>x.id===id); if(!g) return;
+      openCal({ anchor:gd, value:g.deadline||'', view:(g.deadline||todayISO()).slice(0,7), title:'Date limite : '+g.name, sub:'L\u2019application calcule combien mettre de côté chaque mois.',
+        onPick: iso => { if(iso && iso<=todayISO()) return toast('Choisissez une date dans le futur'); store.updateGoal(id,{deadline:iso||''}).then(()=>toast(iso ? g.name+' : avant le '+fmtLong(iso) : 'Date limite supprimée')).catch(fail); } });
+      return; }
+    const ab=ev.target.closest('.g-all'); if(ab){ const g=goals.find(x=>x.id===ab.closest('.goal').dataset.id); if(g){ const need=Math.max(0,(Number(g.target)||0)-(Number(g.saved)||0)); allocate(g, Math.min(need, Math.max(0,goalFree))); } return; }
     const d=ev.target.closest('.del'); if(!d) return; const id=d.closest('.goal').dataset.id, g=goals.find(x=>x.id===id);
     if(d.classList.contains('confirm')) store.removeGoal(id).then(()=>toast('Objectif supprimé : son montant redevient non réparti')).catch(fail);
     else { d.classList.add('confirm'); d.textContent='Suppr.?'; setTimeout(()=>{ if(d.isConnected){ d.classList.remove('confirm'); d.textContent='×'; } },3000); } });
@@ -1832,8 +2067,6 @@ body.is-busy .loadbar{opacity:1}
     const li=ev.target.closest('.row'); if(!li) return; const id=li.dataset.id;
     if(ev.target.classList.contains('lab')){
       const v=ev.target.value.trim().toUpperCase(); if(v) store.update(id,{label:v}).catch(fail);
-    } else if(ev.target.classList.contains('due')){
-      const d=parseAmt(ev.target.value); store.update(id,{due: d>=1 && d<=31 ? d : 0}).catch(fail);
     } else if(ev.target.classList.contains('amt')){
       const e=expenses.find(x=>x.id===id), v=parseAmt(ev.target.value);
       if(e && e.paid && !paysOf(e.id).length){
@@ -1846,6 +2079,11 @@ body.is-busy .loadbar{opacity:1}
   $('rows').addEventListener('keydown',ev=>{ if(ev.key==='Enter' && ev.target.tagName==='INPUT') ev.target.blur(); });
   $('rows').addEventListener('click',ev=>{
     const li=ev.target.closest('.row'); if(!li) return; const id=li.dataset.id;
+    const dueB=ev.target.closest('.due');
+    if(dueB){ const e=expenses.find(x=>x.id===id); if(!e) return; const P=periodOf(month);
+      openCal({ anchor:dueB, value:dueDate(e,month), view:(dueDate(e,month)||todayISO()).slice(0,7), range:P, title:'Échéance de '+e.label, sub:'Période du '+fmtShort(P.start)+' au '+fmtShort(P.end),
+        onPick: iso => store.update(id,{due: iso||''}).then(()=>toast(iso ? e.label+' : échéance le '+fmtShort(iso) : 'Échéance supprimée')).catch(fail) });
+      return; }
     const chk=ev.target.closest('.chk');
     if(chk){ const e=expenses.find(x=>x.id===id); if(!e) return; openLine(e); return; }
     const star=ev.target.closest('.star');
@@ -1853,7 +2091,7 @@ body.is-busy .loadbar{opacity:1}
       const e=expenses.find(x=>x.id===id); if(!e) return;
       const ex=findEss(e.label);
       if(ex) store.removeEss(ex.id).then(()=>toast(norm(e.label)+' retiré des essentielles')).catch(fail);
-      else store.addEss({label:norm(e.label),amount:Number(e.amount)||0,createdAt:Date.now(),due:Number(e.due)||0}).then(()=>toast(norm(e.label)+' ajouté aux essentielles')).catch(fail);
+      else store.addEss({label:norm(e.label),amount:Number(e.amount)||0,createdAt:Date.now(),due:dayOf(e)}).then(()=>toast(norm(e.label)+' ajouté aux essentielles')).catch(fail);
       return;
     }
     const del=ev.target.closest('.del');
@@ -1869,6 +2107,7 @@ body.is-busy .loadbar{opacity:1}
     if(a==='import') importEssentials();
     else if(a==='imprevus'){ tryAdd({month, label:'IMPRÉVUS', amount:20000, paid:false, createdAt:Date.now()}, ()=>{}); }
     else if(a==='goals'){ showTab('eco'); }
+    else if(a==='payess'){ payEssentials(); }
     else if(a.startsWith('cover:')){ const [,eid,iid]=a.split(':'); const e=expenses.find(x=>x.id===eid), im=expenses.find(x=>x.id===iid); if(e&&im){ const need=spentOf(e)-(Number(e.amount)||0), take=Math.min(need, leftOf(im)); store.update(im.id,{amount:(Number(im.amount)||0)-take}).then(()=>store.update(e.id,{amount:(Number(e.amount)||0)+take})).then(()=>toast(fmt(take)+' Ar transférés de IMPRÉVUS vers '+e.label)).catch(fail); } }
     else if(a.startsWith('postpone:')){ const ids=a.slice(9).split(','); Promise.all(ids.map(i=>store.update(i,{month:shiftMonth(month,1), paid:false}))).then(()=>toast(plural(ids.length,'ligne')+' reportée'+(ids.length>1?'s':'')+' à '+monthName(shiftMonth(month,1)))).catch(fail); }
     else if(a.startsWith('budget:')){ const v=Number(a.slice(7)); store.setBudget(month,v).then(()=>toast('Budget de '+fmt(v)+' Ar appliqué')).catch(fail); }
@@ -1888,10 +2127,15 @@ body.is-busy .loadbar{opacity:1}
     const li=ev.target.closest('.row'); if(!li) return; const id=li.dataset.id;
     if(ev.target.classList.contains('lab')){ const v=norm(ev.target.value); if(v) store.updateEss(id,{label:v}).catch(fail); }
     else if(ev.target.classList.contains('amt')) store.updateEss(id,{amount:parseAmt(ev.target.value)}).catch(fail);
-    else if(ev.target.classList.contains('due')){ const d=parseAmt(ev.target.value); store.updateEss(id,{due: d>=1 && d<=31 ? d : 0}).catch(fail); }
+
   });
   $('essRows').addEventListener('keydown',ev=>{ if(ev.key==='Enter' && ev.target.tagName==='INPUT') ev.target.blur(); });
   $('essRows').addEventListener('click',ev=>{
+    const dueB=ev.target.closest('.due');
+    if(dueB){ const id=dueB.closest('.row').dataset.id, e=essentials.find(x=>x.id===id); if(!e) return; const P=periodOf(month);
+      openCal({ anchor:dueB, value: dayOf(e) ? dueDate({due:dayOf(e)},month) : '', view:P.start.slice(0,7), range:P, title:'Échéance de '+e.label, sub:'Elle revient chaque mois au même jour.',
+        onPick: iso => store.updateEss(id,{due: iso ? Number(iso.slice(8,10)) : 0}).then(()=>toast(iso ? e.label+' : chaque mois le '+Number(iso.slice(8,10)) : 'Échéance supprimée')).catch(fail) });
+      return; }
     const del=ev.target.closest('.del'); if(!del) return; const id=del.closest('.row').dataset.id;
     if(del.classList.contains('confirm')){ del.closest('.row').classList.add('leaving'); setTimeout(()=>store.removeEss(id).then(()=>toast('Dépense essentielle supprimée')).catch(fail), 240); }
     else { del.classList.add('confirm'); del.textContent='Suppr.?'; setTimeout(()=>{ if(del.isConnected){ del.classList.remove('confirm'); del.textContent='×'; } },3000); }
@@ -1899,7 +2143,7 @@ body.is-busy .loadbar{opacity:1}
   $('essFromMonth').addEventListener('click', async ()=>{
     try{
       let t=Date.now(), n=0;
-      const ps=[]; for(const e of monthRows(month)){ if(!findEss(e.label)){ ps.push(store.addEss({label:norm(e.label),amount:Number(e.amount)||0,createdAt:t++,due:Number(e.due)||0})); n++; } }
+      const ps=[]; for(const e of monthRows(month)){ if(!findEss(e.label)){ ps.push(store.addEss({label:norm(e.label),amount:Number(e.amount)||0,createdAt:t++,due:dayOf(e)})); n++; } }
       await Promise.all(ps);
       toast(n+' dépenses enregistrées comme essentielles');
     }catch(e){ fail(e); }
@@ -1909,7 +2153,7 @@ body.is-busy .loadbar{opacity:1}
     const prev=shiftMonth(month,-1); const src=monthRows(prev);
     try{
       let t=Date.now();
-      await Promise.all(src.map(e=>store.add({month,label:e.label,amount:e.amount,paid:false,createdAt:t++,due:Number(e.due)||0})));
+      await Promise.all(src.map(e=>store.add({month,label:e.label,amount:e.amount,paid:false,createdAt:t++,due:dueDate({due:dayOf(e)},month)})));
       if(!budgets[month] && budgets[prev]) await store.setBudget(month,budgets[prev]);
       toast(src.length+' lignes reprises de '+monthName(prev));
     }catch(e){ fail(e); }
