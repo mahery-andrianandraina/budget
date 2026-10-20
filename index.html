@@ -878,6 +878,13 @@ body{background:var(--bg);font-size:15px}
 :root[data-theme="dark"] .tabs button[aria-selected="true"]{color:var(--acc)}
 @media (max-width:380px){ .hero-v{font-size:2.5rem} .env-card{width:136px} }
 @media (prefers-reduced-motion:reduce){ .env-card:active{transform:none} }
+
+.hero-safe{display:flex;align-items:center;gap:8px;align-self:flex-start;max-width:100%;border:0;background:rgba(255,201,60,.14);color:#FFE7A3;border-radius:99px;padding:6px 12px 6px 10px;font-size:.8rem;text-align:left}
+.hero-safe svg{width:15px;height:15px;flex:none;color:var(--acc)}
+.hero-safe b{color:var(--acc);font-weight:700}
+.hero-safe.off{background:rgba(255,255,255,.08);color:var(--teal-ink)}
+.hero-safe:hover{filter:brightness(1.1)}
+@media (max-height:860px) and (min-width:861px){ .hero-safe{padding:4px 10px;font-size:.76rem} }
 </style>
 </head>
 <body>
@@ -901,7 +908,7 @@ body{background:var(--bg);font-size:15px}
       <div class="side-month">
         <span class="sm-l" id="sideMonth">—</span>
         <span class="sm-v num" id="sideReste">0 Ar</span>
-        <span class="sm-s">restant sur le budget</span>
+        <span class="sm-s" id="sideResteLab">restant, épargne déduite</span>
         <div class="sm-bar"><i id="sideBar"></i></div>
         <span class="sm-s" id="sideDays"></span>
       </div>
@@ -984,6 +991,7 @@ body{background:var(--bg);font-size:15px}
             <div><span>Disponible</span><b class="num" id="heroAvail">0</b></div>
             <div><span id="heroTodayLab">Noté aujourd'hui</span><b class="num acc" id="heroToday">0</b></div>
           </div>
+          <button type="button" class="hero-safe" id="heroSafe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="heroSafeTxt"></span></button>
         </section>
         <section class="env" aria-label="Enveloppes">
           <div class="sec-h"><h2>Enveloppes</h2><span>touchez une carte pour noter</span></div>
@@ -1007,9 +1015,9 @@ body{background:var(--bg);font-size:15px}
             <span class="d" id="totalDelta"></span>
           </div>
           <div class="kpi">
-            <span class="cap">Reste</span>
+            <span class="cap" title="Budget − épargne protégée − total prévu">Reste libre</span>
             <span class="v num" id="resteWrap"><span id="reste">0</span><small>Ar</small></span>
-            <span class="d" id="resteDelta">Budget moins dépenses</span>
+            <span class="d" id="resteDelta">Épargne déjà déduite</span>
           </div>
           <div class="kpi">
             <span class="cap">Épargne cumulée</span>
@@ -1048,6 +1056,7 @@ body{background:var(--bg);font-size:15px}
             <div class="ring-legend">
               <div><span><i style="background:var(--pos)"></i>Dépensé</span><b id="paidSum">0 Ar</b></div>
               <div><span><i style="background:var(--warn)"></i>Reste à dépenser</span><b id="unpaidSum">0 Ar</b></div>
+              <div id="ringSafeRow"><span><i style="background:var(--acc)"></i>Épargne protégée</span><b id="ringSafe">0 Ar</b></div>
               <div><span><i style="background:var(--line)"></i>Non prévu</span><b id="ringReste">0 Ar</b></div>
             </div>
           </div>
@@ -1343,7 +1352,7 @@ body{background:var(--bg);font-size:15px}
     const budget = budgets[month] || 0;
     const total = rows.reduce((s,e)=>s+(Number(e.amount)||0),0);
     const paid = rows.reduce((s,e)=>s+spentOf(e),0);
-    const reste = budget - total;
+    const reste = budget - reserve - total;   // reste libre : l'épargne protégée est déjà mise de côté
     const availNow = budget - reserve - paid;
 
     if(document.activeElement !== $('budget')) $('budget').value = budget ? fmt(budget) : '';
@@ -1355,8 +1364,9 @@ body{background:var(--bg);font-size:15px}
       const short = new Intl.DateTimeFormat('fr-FR',{month:'short'}).format(new Date(+pv.slice(0,4), +pv.slice(5)-1, 1));
       if(prow.length && rows.length){ const d=total-ptot; $('totalDelta').innerHTML = d===0 ? 'Identique à '+short : '<b class="'+(d>0?'up':'down')+'">'+(d>0?'+':'−')+fmt(Math.abs(d))+'</b> vs '+short; }
       else $('totalDelta').textContent = rows.length ? plural(rows.length,'dépense') : '';
-      if(pb && budget && prow.length){ const d=reste-(pb-ptot); $('resteDelta').innerHTML = d===0 ? 'Identique à '+short : '<b class="'+(d<0?'up':'down')+'">'+(d>0?'+':'−')+fmt(Math.abs(d))+'</b> vs '+short; }
-      else $('resteDelta').textContent = 'Budget moins dépenses'; }
+      if(pb && budget && prow.length){ const d=reste-(pb-reserve-ptot); $('resteDelta').innerHTML = d===0 ? 'Identique à '+short : '<b class="'+(d<0?'up':'down')+'">'+(d>0?'+':'−')+fmt(Math.abs(d))+'</b> vs '+short; }
+      else $('resteDelta').textContent = reserve>0 ? fmt(reserve)+' Ar d’épargne déjà déduits' : 'Budget moins dépenses prévues'; }
+    $('ringSafeRow').hidden = !(reserve>0); $('ringSafe').textContent = fmt(reserve)+' Ar';
     $('sideMonth').textContent = monthName(month);
     $('sideReste').textContent = budget ? fmt(reste)+' Ar' : '—';
     $('sideReste').classList.toggle('neg', reste<0);
@@ -1483,9 +1493,9 @@ body{background:var(--bg);font-size:15px}
       off+=len;
     });
     const pct = budget ? Math.round(total/budget*100) : 0;
-    const r = budget-total;
-    html+='<text x="'+C+'" y="'+(C-1)+'" text-anchor="middle" font-family="Schibsted Grotesk, sans-serif" font-weight="600" font-size="'+(Math.abs(r)>=1e6?15:18)+'" fill="'+(r<0?'var(--neg)':'var(--ink)')+'">'+(budget?fmt(r):'—')+'</text>';
-    html+='<text x="'+C+'" y="'+(C+16)+'" text-anchor="middle" font-size="10" fill="var(--muted)">'+(budget?(r<0?'Ar de dépassement':'Ar restants · '+pct+' %'):'pas de budget')+'</text>';
+    const r = budget-reserve-total;
+    html+='<text x="'+C+'" y="'+(C-1)+'" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="600" font-size="'+(Math.abs(r)>=1e6?15:18)+'" fill="'+(r<0?'var(--neg)':'var(--ink)')+'">'+(budget?fmt(r):'—')+'</text>';
+    html+='<text x="'+C+'" y="'+(C+16)+'" text-anchor="middle" font-size="10" fill="var(--muted)">'+(budget?(r<0?'Ar de dépassement':(reserve>0?'Ar libres · ':'Ar restants · ')+pct+' %'):'pas de budget')+'</text>';
     svg.innerHTML=html;
   }
 
@@ -1524,6 +1534,8 @@ body{background:var(--bg);font-size:15px}
     const ids = new Set(rows.map(e=>e.id));
     const todaySum = payments.filter(x=>ids.has(x.expenseId) && x.date===t).reduce((s,x)=>s+(Number(x.amount)||0),0);
     $('heroTodayLab').textContent = cur ? 'Noté aujourd’hui' : 'Dépensé';
+    $('heroSafeTxt').innerHTML = reserve>0 ? '<b>'+fmt(reserve)+' Ar</b> d’épargne en sécurité · déjà déduits' : 'Aucune épargne protégée · <b>en mettre une</b>';
+    $('heroSafe').classList.toggle('off', !(reserve>0));
     $('heroToday').textContent = fmt(cur ? todaySum : paid);
 
     const box=$('envRow'); box.innerHTML='';
@@ -2500,6 +2512,7 @@ body{background:var(--bg);font-size:15px}
     $('pageTitle').textContent = TITLES[t][0]; $('pageSub').textContent = TITLES[t][1];
     render();
   }
+  $('heroSafe').addEventListener('click', ()=>{ showTab('eco'); setTimeout(()=>{ const r=$('reserve'); r.scrollIntoView({block:'center'}); r.focus(); }, 60); });
   document.querySelector('.tabs').addEventListener('click',ev=>{ const b=ev.target.closest('[data-tab]'); if(b) showTab(b.dataset.tab); });
   showTab('mois');
 
