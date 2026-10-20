@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Budget Mahery</title>
+<title>Budget · Mahery ANDRIANANDRAINA</title>
 <meta name="theme-color" content="#0B3B3C">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E %3Crect width="64" height="64" rx="16" fill="#0B3B3C"/%3E %3Crect x="13" y="43" width="7" height="8" rx="2" fill="#2E7F79"/%3E %3Crect x="28.5" y="31" width="7" height="20" rx="2" fill="#2E7F79"/%3E %3Crect x="44" y="24" width="7" height="27" rx="2" fill="#2E7F79"/%3E %3Cpath d="M16.5 40V17.5L32 33L46 19" fill="none" stroke="#fff" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/%3E %3Cpath d="M38.5 15.5H49.5V26.5" fill="none" stroke="#FFC93C" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/%3E %3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E %3Crect width="64" height="64" rx="16" fill="#0B3B3C"/%3E %3Crect x="13" y="43" width="7" height="8" rx="2" fill="#2E7F79"/%3E %3Crect x="28.5" y="31" width="7" height="20" rx="2" fill="#2E7F79"/%3E %3Crect x="44" y="24" width="7" height="27" rx="2" fill="#2E7F79"/%3E %3Cpath d="M16.5 40V17.5L32 33L46 19" fill="none" stroke="#fff" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/%3E %3Cpath d="M38.5 15.5H49.5V26.5" fill="none" stroke="#FFC93C" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/%3E %3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap">
@@ -927,6 +929,20 @@ body{background:var(--bg);font-size:15px}
   .hero.fx-pulse,.hero.fx-hit #heroAvail,.hero.fx-hit #heroDay{animation:none}
 }
 @keyframes fxFade{0%,100%{opacity:0}10%,85%{opacity:1}}
+
+/* ===== Logo Mahery ===== */
+.logo,.logo{width:38px;height:38px;border-radius:11px;background:none;padding:0;box-shadow:0 0 0 1px rgba(255,255,255,.16);overflow:hidden}
+.logo svg{width:38px;height:38px;display:block}
+.brand b{font-size:1.12rem;letter-spacing:-.01em}
+.brand small{letter-spacing:.18em;text-transform:uppercase;font-size:.64rem}
+.topbar h1{display:flex;align-items:center;gap:10px}
+.m-logo{display:none;width:32px;height:32px;border-radius:9px;flex:none}
+@media (max-width:860px){ .m-logo{display:block} }
+
+.brand{gap:11px}
+.brand-t{min-width:0;display:flex;flex-direction:column;line-height:1.15}
+.brand-t .brand-sn{font-size:.66rem;letter-spacing:.06em;color:#fff;opacity:.88;font-weight:600;white-space:nowrap}
+.brand-t small:last-child{font-size:.58rem;letter-spacing:.2em;color:var(--acc);margin-top:2px}
 </style>
 </head>
 <body>
@@ -936,8 +952,8 @@ body{background:var(--bg);font-size:15px}
 <div class="app loading">
   <aside class="side">
     <div class="brand">
-      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 4a8 8 0 1 1-7.4 5"/><path d="M12 4v8h8" opacity=".55"/></svg></div>
-      <div><b>Budget</b><small>Gestion des dépenses</small></div>
+      <div class="logo"><svg viewBox="0 0 64 64" role="img" aria-label="Logo Mahery"><rect width="64" height="64" rx="16" fill="#0B3B3C"/> <rect x="13" y="43" width="7" height="8" rx="2" fill="#2E7F79"/> <rect x="28.5" y="31" width="7" height="20" rx="2" fill="#2E7F79"/> <rect x="44" y="24" width="7" height="27" rx="2" fill="#2E7F79"/> <path d="M16.5 40V17.5L32 33L46 19" fill="none" stroke="#fff" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/> <path d="M38.5 15.5H49.5V26.5" fill="none" stroke="#FFC93C" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="brand-t"><b>Mahery</b><small class="brand-sn">ANDRIANANDRAINA</small><small>Budget</small></div>
     </div>
     <nav class="tabs" role="tablist" aria-label="Menu">
       <span class="cap">Menu</span>
@@ -966,7 +982,7 @@ body{background:var(--bg);font-size:15px}
   <section class="main">
     <header class="topbar">
       <div>
-        <h1 id="pageTitle">Mois</h1>
+        <h1 id="pageTitle"><svg class="m-logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#0B3B3C"/> <rect x="13" y="43" width="7" height="8" rx="2" fill="#2E7F79"/> <rect x="28.5" y="31" width="7" height="20" rx="2" fill="#2E7F79"/> <rect x="44" y="24" width="7" height="27" rx="2" fill="#2E7F79"/> <path d="M16.5 40V17.5L32 33L46 19" fill="none" stroke="#fff" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/> <path d="M38.5 15.5H49.5V26.5" fill="none" stroke="#FFC93C" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="pageTitleTxt">Mois</span></h1>
         <span class="sub" id="pageSub">Budget, dépenses et paiements du mois</span>
       </div>
       <div class="tools">
@@ -2661,7 +2677,7 @@ body{background:var(--bg);font-size:15px}
     curTab = t;
     document.querySelectorAll('.tabs [data-tab]').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.tab===t)));
     document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active', p.dataset.pane===t));
-    $('pageTitle').textContent = TITLES[t][0]; $('pageSub').textContent = TITLES[t][1];
+    $('pageTitleTxt').textContent = TITLES[t][0]; $('pageSub').textContent = TITLES[t][1];
     render();
   }
   $('heroSafe').addEventListener('click', ()=>{ showTab('eco'); setTimeout(()=>{ const r=$('reserve'); r.scrollIntoView({block:'center'}); r.focus(); }, 60); });
