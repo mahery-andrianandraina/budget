@@ -2007,6 +2007,19 @@ body{background:var(--bg);font-size:15px}
     return [...s].sort();
   }
   const plural = (n,w)=> n+' '+w+(n>1?'s':'');
+  /* Real figures: what was actually recorded (versements, lignes réglées), not only what was planned */
+  const isClosed = m => todayISO() > periodOf(m).end;
+  const recorded = e => paysOf(e.id).length>0 || !!e.paid;
+  function periodPays(m){ const ids=new Set(monthRows(m).map(e=>e.id)); return payments.filter(x=>ids.has(x.expenseId)); }
+  // A finished period: real spending; a line with nothing recorded is counted at its planned amount (and reported)
+  function realStats(m){
+    const rows=monthRows(m), b=budgets[m]||0;
+    const unrec=rows.filter(e=>!recorded(e) && (Number(e.amount)||0)>0);
+    const spent=rows.reduce((s,e)=>s+(recorded(e) ? spentOf(e) : (Number(e.amount)||0)),0);
+    return {m, b, rows, spent, saved:b-spent, unrec};
+  }
+  // The running period: what is already spent + what the envelopes still allow
+  const projOf = rows => rows.reduce((s,e)=>s+Math.max(Number(e.amount)||0, spentOf(e)),0);
 
   function buildInsights(){
     const out = [];
@@ -2016,11 +2029,11 @@ body{background:var(--bg);font-size:15px}
 
     if(!cur.has){
       if(essentials.length) out.push({lvl:'info', t:'Mois vide', x:'Importez vos '+plural(essentials.length,'dépense')+' essentielle'+(essentials.length>1?'s':'')+' ('+fmt(essTot)+' Ar) pour démarrer ce mois.', act:'import', actLbl:'Importer'});
-      const hist = all.filter(s=>s.m<month).slice(-3);
+      const hist = all.filter(s=>s.m<month && s.b>0 && isClosed(s.m)).slice(-3).map(s=>realStats(s.m));
       if(hist.length){
-        const avgD = hist.reduce((s,x)=>s+x.d,0)/hist.length;
+        const avgD = hist.reduce((s,x)=>s+x.spent,0)/hist.length;
         const avgB = hist.reduce((s,x)=>s+x.b,0)/hist.length;
-        out.push({lvl:'info', t:'Budget suggéré : '+fmt(avgB)+' Ar', x:'Moyenne de vos '+(hist.length>1?hist.length+' derniers mois':'dernier mois')+'. Vos dépenses y étaient en moyenne de '+fmt(avgD)+' Ar.', act:'budget:'+Math.round(avgB), actLbl:'Utiliser ce budget'});
+        out.push({lvl:'info', t:'Budget suggéré : '+fmt(avgB)+' Ar', x:'Moyenne de vos budgets sur '+(hist.length>1?'les '+hist.length+' dernières périodes terminées':'la dernière période terminée')+'. Vous y avez réellement dépensé '+fmt(avgD)+' Ar en moyenne.', act:'budget:'+Math.round(avgB), actLbl:'Utiliser ce budget'});
       }
       return out;
     }
@@ -2051,12 +2064,35 @@ body{background:var(--bg);font-size:15px}
         else if(pc && pc.projected > a) out.push({lvl:'warn', t:'À ce rythme, '+e.label+' va dépasser', x:fmt(pc.rate)+' Ar par jour mène à '+fmt(pc.projected)+' Ar en fin de mois pour '+fmt(a)+' Ar prévus. Limitez-vous à '+fmt(Math.floor((a-sp)/Math.max(1,pc.daysLeft)))+' Ar par jour.'});
       }
     });
-    if(cur.b && month===thisMonth()){
-      const D=daysInfo(month), avail=cur.b-reserve-cur.paid;
-      if(avail>0 && D.left>0) out.push({lvl:'info', t:'Vous pouvez dépenser '+fmt(Math.floor(avail/D.left))+' Ar par jour', x:fmt(avail)+' Ar disponibles pour les '+plural(D.left,'jour')+' qui restent'+(reserve>0?', épargne protégée mise à part.':'.')});
+    // R1. real pace of day-to-day spending (envelopes paid in several payments, essentials excluded)
+    if(month===thisMonth()){
+      const D=daysInfo(month), daily=cur.rows.filter(e=>paysOf(e.id).length && !isEss(e));
+      const bud=daily.reduce((s,e)=>s+(Number(e.amount)||0),0), sp=daily.reduce((s,e)=>s+spentOf(e),0);
+      if(bud>0 && sp>0 && D.today>=2 && D.last>0){
+        const exp=bud*D.today/D.last, perDay=Math.round(sp/D.today), ok=Math.round(bud/D.last);
+        const names=daily.map(e=>e.label).slice(0,4).join(', ');
+        if(sp > exp*1.15 && sp-exp >= 3000) out.push({lvl:'warn', t:'Dépenses courantes plus rapides que prévu', x:'Jour '+D.today+' sur '+D.last+' : '+fmt(sp)+' Ar déjà dépensés sur '+fmt(bud)+' Ar ('+names+'), soit '+Math.round(sp/bud*100)+' % pour '+Math.round(D.today/D.last*100)+' % de la période. Vous dépensez '+fmt(perDay)+' Ar par jour, le rythme qui tient est de '+fmt(ok)+' Ar.'});
+        else if(sp < exp*0.85) out.push({lvl:'good', t:'Dépenses courantes sous contrôle', x:'Jour '+D.today+' sur '+D.last+' : '+fmt(sp)+' Ar dépensés sur '+fmt(bud)+' Ar ('+names+'), soit '+fmt(perDay)+' Ar par jour pour '+fmt(ok)+' Ar possibles.'});
+        else out.push({lvl:'info', t:'Dépenses courantes dans le rythme', x:fmt(sp)+' Ar dépensés sur '+fmt(bud)+' Ar ('+names+') en '+plural(D.today,'jour')+', soit '+fmt(perDay)+' Ar par jour.'});
+      }
+    }
+    // R2. where the money really went
+    if(cur.paid>0){
+      const top=cur.rows.filter(e=>spentOf(e)>0).sort((a,b)=>spentOf(b)-spentOf(a)).slice(0,3);
+      out.push({lvl:'info', t:'Réellement dépensé : '+fmt(cur.paid)+' Ar'+(cur.b?' ('+Math.round(cur.paid/cur.b*100)+' % du budget)':''), x:'Les plus gros postes : '+top.map(e=>e.label+' '+fmt(spentOf(e))+' Ar ('+Math.round(spentOf(e)/cur.paid*100)+' %)').join(', ')+'.'});
+    }
+    // R3. recap of the previous, finished period
+    { const pm=shiftMonth(month,-1);
+      if(month===thisMonth() && isClosed(pm) && budgets[pm]>0 && monthRows(pm).length){
+        const S=realStats(pm), env=S.rows.filter(e=>paysOf(e.id).length);
+        const unused=env.filter(e=>spentOf(e)<(Number(e.amount)||0)), overs=env.filter(e=>stateOf(e)==='over');
+        const uSum=unused.reduce((s,e)=>s+leftOf(e),0), oSum=overs.reduce((s,e)=>s+spentOf(e)-(Number(e.amount)||0),0);
+        out.push({lvl: S.saved<0?'alert':'good', t:monthName(pm)+' : '+(S.saved<0 ? 'dépassement de '+fmt(-S.saved)+' Ar' : fmt(S.saved)+' Ar réellement épargnés'),
+          x:'Dépensé : '+fmt(S.spent)+' Ar sur '+fmt(S.b)+' Ar de budget.'+(uSum>0?' Enveloppes pas utilisées jusqu’au bout : '+fmt(uSum)+' Ar gardés ('+unused.slice(0,3).map(e=>e.label+' '+fmt(leftOf(e))).join(', ')+').':'')+(oSum>0?' Dépassements : '+fmt(oSum)+' Ar ('+overs.slice(0,3).map(e=>e.label).join(', ')+').':'')+(S.unrec.length?' '+plural(S.unrec.length,'ligne')+' sans versement noté ('+S.unrec.slice(0,3).map(e=>e.label).join(', ')+') '+(S.unrec.length>1?'sont comptées':'est comptée')+' au montant prévu.':'')});
+      }
     }
 
-    if(cur.rows.length && !cur.rows.some(e=>isImp(e.label))) out.push({lvl:'info', t:'Pas d\u2019enveloppe IMPRÉVUS ce mois-ci', x:'Une petite réserve pour les imprévus (par exemple 20 000 Ar) évite qu\u2019une dépense inattendue fasse dépasser vos autres enveloppes.', act:'imprevus', actLbl:'Créer IMPRÉVUS (20 000 Ar)'});
+    if(cur.rows.length && !isClosed(month) && !cur.rows.some(e=>isImp(e.label))) out.push({lvl:'info', t:'Pas d\u2019enveloppe IMPRÉVUS ce mois-ci', x:'Une petite réserve pour les imprévus (par exemple 20 000 Ar) évite qu\u2019une dépense inattendue fasse dépasser vos autres enveloppes.', act:'imprevus', actLbl:'Créer IMPRÉVUS (20 000 Ar)'});
 
     { const D=daysInfo(month), er=cur.rows.filter(e=>isEss(e)), left=er.reduce((s,e)=>s+leftOf(e),0);
       if(month===thisMonth() && left>0 && D.today<=5) out.push({lvl:'warn', t:'Début de période : réglez d’abord vos essentielles', x:fmt(left)+' Ar pour '+er.filter(e=>leftOf(e)>0).map(e=>e.label).join(', ')+'. Ce qui reste ensuite ('+fmt(cur.b-reserve-er.reduce((s,e)=>s+(Number(e.amount)||0),0))+' Ar) est votre vraie marge.', act:'payess', actLbl:'Régler les essentielles'}); }
@@ -2090,15 +2126,23 @@ body{background:var(--bg);font-size:15px}
 
     // 1. budget status
     if(!cur.b) out.push({lvl:'warn', t:'Aucun budget saisi', x:'Saisissez votre budget en haut de la page pour calculer le reste et vos économies.'});
-    else if(cur.r<0) out.push({lvl:'alert', t:'Budget dépassé de '+fmt(-cur.r)+' Ar', x:'Vos dépenses prévues ('+fmt(cur.d)+' Ar) dépassent le budget. Ce dépassement sera retiré de vos économies.'});
-    else {
-      const rate = cur.r/cur.b*100;
-      out.push({lvl: rate>=10?'good':'warn', t:'Taux d’épargne : '+Math.round(rate)+' %', x: rate>=20 ? 'Excellent : vous mettez de côté '+fmt(cur.r)+' Ar ce mois-ci.' : rate>=10 ? 'Vous mettez de côté '+fmt(cur.r)+' Ar. Viser 20 % représenterait '+fmt(cur.b*0.2)+' Ar.' : 'Il ne reste que '+fmt(cur.r)+' Ar. Une marge de 10 % ('+fmt(cur.b*0.1)+' Ar) protège des imprévus.'});
+    else if(isClosed(month)){
+      const S=realStats(month), rate=S.saved/S.b*100;
+      out.push({lvl: S.saved<0?'alert':rate>=10?'good':'warn', t: S.saved<0 ? 'Période terminée en dépassement de '+fmt(-S.saved)+' Ar' : 'Épargne réelle : '+fmt(S.saved)+' Ar ('+Math.round(rate)+' %)',
+        x:'Réellement dépensé : '+fmt(S.spent)+' Ar sur '+fmt(S.b)+' Ar ('+fmt(cur.d)+' Ar étaient prévus).'+(S.unrec.length?' '+plural(S.unrec.length,'ligne')+' sans versement noté, comptée'+(S.unrec.length>1?'s':'')+' au montant prévu.':'')});
+    } else {
+      const proj=projOf(cur.rows), ps=cur.b-proj, rate=ps/cur.b*100;
+      if(ps<0) out.push({lvl:'alert', t:'Budget dépassé de '+fmt(-ps)+' Ar', x:'Déjà dépensé ('+fmt(cur.paid)+' Ar) et reste des enveloppes : '+fmt(proj)+' Ar pour '+fmt(cur.b)+' Ar de budget. Ce dépassement sera retiré de vos économies.'});
+      else out.push({lvl: rate>=10?'good':'warn', t:'Épargne prévue en fin de période : '+fmt(ps)+' Ar ('+Math.round(rate)+' %)', x:(reserve>0 && ps>=reserve ? 'Dont '+fmt(reserve)+' Ar d’épargne protégée. ' : '')+'Si chaque enveloppe est utilisée jusqu’au bout. Déjà dépensé réellement : '+fmt(cur.paid)+' Ar.'+(rate<10?' Une marge de 10 % ('+fmt(cur.b*0.1)+' Ar) protège des imprévus.':rate<20?' Viser 20 % représenterait '+fmt(cur.b*0.2)+' Ar.':'')});
     }
 
     // 2. unpaid
     const unpaid = cur.rows.filter(e=>!settled(e));
     if(cur.rows.length && unpaid.length===0) out.push({lvl:'good', t:'Tout est payé', x:'Toutes les dépenses du mois sont réglées.'});
+    else if(unpaid.length && isClosed(month)){
+      const kept = unpaid.filter(e=>paysOf(e.id).length);
+      if(kept.length) out.push({lvl:'good', t:fmt(kept.reduce((s,e)=>s+leftOf(e),0))+' Ar restés dans les enveloppes', x:'Non dépensés à la fin de la période : '+kept.sort((a,b)=>leftOf(b)-leftOf(a)).slice(0,3).map(e=>e.label+' '+fmt(leftOf(e))+' Ar').join(', ')+'.'});
+    }
     else if(unpaid.length){
       const big = unpaid.slice().sort((a,b)=>b.amount-a.amount).slice(0,3).map(e=>e.label).join(', ');
       out.push({lvl:'info', t:plural(unpaid.length,'dépense')+' à payer : '+fmt(unpaid.reduce((s,e)=>s+leftOf(e),0))+' Ar', x:'Les plus importantes : '+big+'.'});
@@ -2108,17 +2152,24 @@ body{background:var(--bg);font-size:15px}
     if(cur.d>0){
       const top = cur.rows.slice().sort((a,b)=>b.amount-a.amount)[0];
       const share = top.amount/cur.d*100;
-      if(share>=35) out.push({lvl:'warn', t:top.label+' pèse '+Math.round(share)+' % des dépenses', x:'C’est votre poste principal ('+fmt(top.amount)+' Ar). Toute baisse sur cette ligne a un effet direct sur l’épargne.'});
+      if(share>=35) out.push({lvl:'warn', t:top.label+' pèse '+Math.round(share)+' % des dépenses prévues', x:'C’est votre poste principal ('+fmt(top.amount)+' Ar). Toute baisse sur cette ligne a un effet direct sur l’épargne.'});
     }
 
-    // 4. vs previous month
+    // 4a. vs previous period, real payments at the same day of the period
+    if(month===thisMonth() && prev.rows.length){
+      const D=daysInfo(month), cut=addDays(periodOf(prev.m).start, D.today-1), t=todayISO();
+      const pp=periodPays(prev.m).filter(x=>x.date<=cut).reduce((s,x)=>s+(Number(x.amount)||0),0);
+      const cp=periodPays(month).filter(x=>x.date<=t).reduce((s,x)=>s+(Number(x.amount)||0),0);
+      if(pp>0 && cp>0 && Math.abs(cp-pp)>=2000) out.push({lvl: cp>pp?'warn':'good', t:'Versements '+(cp>pp?'en hausse':'en baisse')+' de '+fmt(Math.abs(cp-pp))+' Ar', x:'Au jour '+D.today+' de la période : '+fmt(cp)+' Ar notés, contre '+fmt(pp)+' Ar à la même date en '+monthName(prev.m)+'.'});
+    }
+    // 4b. vs previous month, planned lines
     if(prev.rows.length && cur.rows.length){
       const pm = {}; prev.rows.forEach(e=>pm[norm(e.label)]=(pm[norm(e.label)]||0)+(Number(e.amount)||0));
       const ups=[], downs=[], news=[];
       const cm = {}; cur.rows.forEach(e=>cm[norm(e.label)]=(cm[norm(e.label)]||0)+(Number(e.amount)||0));
       Object.keys(cm).forEach(k=>{ if(!(k in pm)) news.push(k); else if(cm[k]>pm[k]) ups.push([k,cm[k]-pm[k]]); else if(cm[k]<pm[k]) downs.push([k,pm[k]-cm[k]]); });
       const diff = cur.d - prev.d;
-      if(diff!==0) out.push({lvl: diff>0?'warn':'good', t:'Dépenses '+(diff>0?'en hausse':'en baisse')+' de '+fmt(Math.abs(diff))+' Ar', x:'Par rapport à '+monthName(prev.m)+'.'+(ups.length?' Hausse : '+ups.sort((a,b)=>b[1]-a[1]).slice(0,3).map(u=>u[0]+' (+'+fmt(u[1])+')').join(', ')+'.':'')+(downs.length?' Baisse : '+downs.sort((a,b)=>b[1]-a[1]).slice(0,3).map(u=>u[0]+' (−'+fmt(u[1])+')').join(', ')+'.':'')+(news.length?' Nouveau : '+news.slice(0,3).join(', ')+'.':'')});
+      if(diff!==0) out.push({lvl: diff>0?'warn':'good', t:'Dépenses prévues '+(diff>0?'en hausse':'en baisse')+' de '+fmt(Math.abs(diff))+' Ar', x:'Par rapport à '+monthName(prev.m)+'.'+(ups.length?' Hausse : '+ups.sort((a,b)=>b[1]-a[1]).slice(0,3).map(u=>u[0]+' (+'+fmt(u[1])+')').join(', ')+'.':'')+(downs.length?' Baisse : '+downs.sort((a,b)=>b[1]-a[1]).slice(0,3).map(u=>u[0]+' (−'+fmt(u[1])+')').join(', ')+'.':'')+(news.length?' Nouveau : '+news.slice(0,3).join(', ')+'.':'')});
     }
 
     // 5. essentials coverage
@@ -2126,17 +2177,20 @@ body{background:var(--bg);font-size:15px}
       const miss = missingEss(cur.rows);
       if(miss.length) out.push({lvl:'warn', t:plural(miss.length,'essentielle')+' pas encore dans ce mois', x:miss.slice(0,4).map(e=>e.label).join(', ')+(miss.length>4?'…':'')+' — '+fmt(miss.reduce((s,e)=>s+(Number(e.amount)||0),0))+' Ar.', act:'import', actLbl:'Importer'});
       if(cur.b){
-        const p = essTot/cur.b*100;
-        out.push({lvl: p>80?'alert':p>60?'warn':'info', t:'Les essentielles prennent '+Math.round(p)+' % du budget', x:'Elles coûtent '+fmt(essTot)+' Ar par mois. Il reste '+fmt(cur.b-essTot)+' Ar pour le reste et l’épargne.'});
+        const er=cur.rows.filter(e=>isEss(e)), essM = er.length ? er.reduce((s,e)=>s+Math.max(Number(e.amount)||0, spentOf(e)),0) : essTot;
+        const p = essM/cur.b*100;
+        out.push({lvl: p>80?'alert':p>60?'warn':'info', t:'Les essentielles prennent '+Math.round(p)+' % du budget', x:'Elles coûtent '+fmt(essM)+' Ar '+(er.length?'ce mois-ci':'par mois')+'. Il reste '+fmt(cur.b-essM)+' Ar pour le reste et l’épargne.'});
       }
     }
 
     // 6. average saving and goal
-    const past = all.filter(s=>s.b>0);
-    if(past.length>=2){
-      const avg = past.reduce((s,x)=>s+x.r,0)/past.length;
-      if(cur.b && cur.r < avg) out.push({lvl:'warn', t:'Moins d’épargne que d’habitude', x:'Ce mois : '+fmt(cur.r)+' Ar, contre '+fmt(avg)+' Ar en moyenne sur '+past.length+' mois.'});
-      else if(cur.b) out.push({lvl:'good', t:'Mieux que votre moyenne', x:'Ce mois : '+fmt(cur.r)+' Ar, contre '+fmt(avg)+' Ar en moyenne sur '+past.length+' mois.'});
+    const past = all.filter(s=>s.b>0 && s.m!==month && isClosed(s.m)).map(s=>realStats(s.m));
+    if(past.length>=1 && cur.b){
+      const avg = past.reduce((s,x)=>s+x.saved,0)/past.length;
+      const mine = isClosed(month) ? realStats(month).saved : cur.b-projOf(cur.rows), lab = isClosed(month) ? 'réellement' : 'prévus';
+      const x = 'Cette période : '+fmt(mine)+' Ar '+lab+', contre '+fmt(avg)+' Ar réellement épargnés en moyenne sur '+plural(past.length,'période')+' terminée'+(past.length>1?'s':'')+'.';
+      if(mine < avg - 1000) out.push({lvl:'warn', t:'Moins d’épargne que d’habitude', x});
+      else if(mine > avg + 1000) out.push({lvl:'good', t:'Mieux que votre moyenne', x});
     }
     // 7. savings goals
     {
